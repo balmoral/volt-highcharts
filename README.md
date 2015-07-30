@@ -101,7 +101,7 @@ The chart object(s) found in ```page._chart``` and ```page._charts``` have been 
 
 Opal's Native() wraps a JS object to provide access to properties and functions in the JS object via Ruby method calls. As of writing (July 30, 2015) Native has not yet been documented. If you prefer to use backticks or %x{} to inline JS code you can get the JS object using #to_n.
 
-For example, to change a series in a chart us Native(), you might do:
+For example, to change a series in a chart using Native(), you might do:
 ```
   def update_sales
     e = page._charts.find { |e| e._id == 'sales' }
@@ -109,7 +109,7 @@ For example, to change a series in a chart us Native(), you might do:
     Native(series[0]).setData(sales_data.to_n)
   end
 ```
-Alternatively, the equivalent using backticks is:
+The equivalent using backticks is:
 ```
   def update_sales
     native_chart = page._chart.to_n # get the native JS chart
