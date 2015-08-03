@@ -27,7 +27,7 @@ module Highcharts
       # Also set page._char_id to the id of the new (last) chart.
       @id = chart_model._id
       @chart_model = chart_model
-      @highchart = Highcharts::Chart.new(@chart_model.to_h)
+      @highchart = Highcharts::Chart.new(@chart_model)
       page._charts << Volt::Model.new({id: @id, chart: @highchart})
       page._chart = @highchart # a simple way for later access
       page._chart_id = @id # so we know whether it's me
