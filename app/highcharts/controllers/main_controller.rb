@@ -8,37 +8,48 @@ require 'opal-highcharts'
 module Highcharts
   class MainController < Volt::ModelController
 
-    attr_reader :watches
+    attr_reader :watches, :chart_options, :reactive
 
     def initialize(*args)
       super
       @watches = []
+      @chart_options = nil
     end
 
     def index_ready
       # Volt.logger.debug("#{self.class.name}##{__method__}:#{__LINE__} : #{Time.now}")
 
-      chart_model = attrs.chart ? attrs.chart : missing_chart
-      chart_model = Volt::Model.new(chart_model.to_h) unless chart_model.is_a?(Volt::Model)
+      @chart_options = attrs.options
+      unless @chart_options
+        raise ArgumentError, "no options attribute set for :highcharts component"
+      end
+      unless @chart_options.is_a?(Volt::Model)
+        if attr.chart[:reactive]
+          raise ArgumentError, ":highcharts options attribute must be a Volt::Model if :reactive is true"
+        end
+        # now convert to a Volt::Model for consistency
+        @chart_options = Volt::Model.new(@chart_options)
+      end
+      # if if not given, then create one
+      @id = chart_options._id || random_id
+      @reactive = chart_options._reactive
 
       # Create the highchart and add it to the page._charts.
       # page._charts ia an array of Volt::Models with an id and a highchart attribute.
       # Also set page._chart to the newly (last) created highchart.
       # Also set page._char_id to the id of the new (last) chart.
-      @id = chart_model._id
-      @chart_model = chart_model
-      @highchart = Highcharts::Chart.new(@chart_model)
+      @highchart = Highcharts::Chart.new(@chart_options.to_h)
       page._charts << Volt::Model.new({id: @id, chart: @highchart})
-      page._chart = @highchart # a simple way for later access
-      page._chart_id = @id # so we know whether it's me
-      # Volt.logger.debug("#{self.class.name}##{__method__}:#{__LINE__} : page._charts='#{page._charts}' page._charts.size=#{page._charts.size}")
+      page._chart = @highchart
+      page._chart_id = @id
 
+      # Volt.logger.debug("#{self.class.name}##{__method__}:#{__LINE__} : page._charts='#{page._charts}' page._charts.size=#{page._charts.size}")
       # Volt.logger.debug("#{self.class.name}##{__method__}:#{__LINE__} : @highchart.config=#{@highchart.config.colors}")
       # Volt.logger.debug("#{self.class.name}##{__method__}:#{__LINE__} : @highchart.series=#{@highchart.series.first.name}")
-
     end
 
     def before_index_remove
+      stop_watching
       # Volt.logger.debug("#{self.class.name}##{__method__}:#{__LINE__} #{Time.now}")
       # clear all references to this chart
       i = page._charts.find_index { |e| e._id == @id }
@@ -58,14 +69,16 @@ module Highcharts
 
     private
 
-    # Generate a unique id for chart container.
-    def random_id
-      "highcharts#{(rand * 1000000000).to_i}"
+    def start_watching
+      return unless reactive
     end
 
-    # Placeholder for missing chart in view
-    def missing_chart
-      { chart: { title: 'No chart attribute set for :highcharts component!!' } }
+    def stop_watching
+    end
+
+    # Generate a reasonably unique id for chart container.
+    def random_id
+      "hc_#{(rand * 1000000000).to_i}"
     end
 
   end
