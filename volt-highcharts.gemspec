@@ -17,6 +17,8 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
+  spec.add_runtime_dependency 'opal-highcharts', '~> 0.1.0'
+
   # spec.add_development_dependency "volt", "~> 0.9.5.pre3"
   # spec.add_development_dependency 'rspec', '~> 3.2.0'
   # spec.add_development_dependency "rake"
