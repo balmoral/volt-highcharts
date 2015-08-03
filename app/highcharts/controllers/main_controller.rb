@@ -25,7 +25,7 @@ module Highcharts
       # page._charts ia an array of Volt::Models with an id and a highchart attribute.
       # Also set page._chart to the newly (last) created highchart.
       # Also set page._char_id to the id of the new (last) chart.
-      @id = chart_model._volt._id
+      @id = chart_model._id
       @chart_model = chart_model
       @highchart = Highcharts::Chart.new(@chart_model)
       page._charts << Volt::Model.new({id: @id, chart: @highchart})
