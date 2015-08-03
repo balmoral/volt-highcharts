@@ -43,9 +43,9 @@ module Highcharts
       page._chart = @highchart
       page._chart_id = @id
 
-      # Volt.logger.debug("#{self.class.name}##{__method__}:#{__LINE__} : page._charts='#{page._charts}' page._charts.size=#{page._charts.size}")
-      # Volt.logger.debug("#{self.class.name}##{__method__}:#{__LINE__} : @highchart.config=#{@highchart.config.colors}")
-      # Volt.logger.debug("#{self.class.name}##{__method__}:#{__LINE__} : @highchart.series=#{@highchart.series.first.name}")
+      Volt.logger.debug("#{self.class.name}##{__method__}:#{__LINE__} : page._charts='#{page._charts}' page._charts.size=#{page._charts.size}")
+      Volt.logger.debug("#{self.class.name}##{__method__}:#{__LINE__} : @highchart.config=#{@highchart.config}")
+      Volt.logger.debug("#{self.class.name}##{__method__}:#{__LINE__} : @highchart.series=#{@highchart.series}")
     end
 
     def before_index_remove
