@@ -33,8 +33,8 @@ module Highcharts
       page._chart_id = @id # so we know whether it's me
       # Volt.logger.debug("#{self.class.name}##{__method__}:#{__LINE__} : page._charts='#{page._charts}' page._charts.size=#{page._charts.size}")
 
-      Volt.logger.debug("#{self.class.name}##{__method__}:#{__LINE__} : @highchart.config=#{@highchart.config.colors}")
-      Volt.logger.debug("#{self.class.name}##{__method__}:#{__LINE__} : @highchart.series=#{@highchart.series.first.name}")
+      # Volt.logger.debug("#{self.class.name}##{__method__}:#{__LINE__} : @highchart.config=#{@highchart.config.colors}")
+      # Volt.logger.debug("#{self.class.name}##{__method__}:#{__LINE__} : @highchart.series=#{@highchart.series.first.name}")
 
     end
 
