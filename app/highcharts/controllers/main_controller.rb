@@ -43,8 +43,7 @@ module Highcharts
       page._chart = @highchart
       page._chart_id = @id
 
-      @highchart.set_title("Set title to: #{Time.now.to_s}")
-
+      Volt.logger.debug("#{self.class.name}##{__method__}:#{__LINE__} : page._chart='#{page._chart}'")
       Volt.logger.debug("#{self.class.name}##{__method__}:#{__LINE__} : page._charts='#{page._charts}' page._charts.size=#{page._charts.size}")
       Volt.logger.debug("#{self.class.name}##{__method__}:#{__LINE__} : @highchart.options=#{@highchart.options}")
       Volt.logger.debug("#{self.class.name}##{__method__}:#{__LINE__} : @highchart.options.colors=#{@highchart.options.colors}")
