@@ -73,6 +73,8 @@ module Highcharts
 
     private
 
+
+
     def start_watching
       return unless reactive
     end
