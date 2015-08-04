@@ -8,48 +8,43 @@ require 'opal-highcharts'
 module Highcharts
   class MainController < Volt::ModelController
 
-    attr_reader :watches, :chart_options, :reactive
+    attr_reader :watches, :options, :reactive
 
     def initialize(*args)
       super
       @watches = []
-      @chart_options = nil
+      @options = nil
     end
 
     def index_ready
       # Volt.logger.debug("#{self.class.name}##{__method__}:#{__LINE__} : #{Time.now}")
 
-      @chart_options = attrs.options
-      unless @chart_options
-        raise ArgumentError, "no options attribute set for :highcharts component"
+      @options = attrs.options
+      unless @options
+        raise ArgumentError, "no options attribute set for :charts component"
       end
-      unless @chart_options.is_a?(Volt::Model)
+      unless @options.is_a?(Volt::Model)
         if attr.chart[:reactive]
-          raise ArgumentError, ":highcharts options attribute must be a Volt::Model if :reactive is true"
+          raise ArgumentError, ":charts options attribute must be a Volt::Model if :reactive is true"
         end
         # now convert to a Volt::Model for consistency
-        @chart_options = Volt::Model.new(@chart_options)
+        @options = Volt::Model.new(@options)
       end
       # if if not given, then create one
-      @id = chart_options._id || random_id
-      @reactive = chart_options._reactive
+      @id = options._id || random_id
+      @reactive = options._reactive
 
-      # Create the highchart and add it to the page._charts.
-      # page._charts ia an array of Volt::Models with an id and a highchart attribute.
-      # Also set page._chart to the newly (last) created highchart.
+      # Create the chart and add it to the page._charts.
+      # page._charts ia an array of Volt::Models with an id and a chart attribute.
+      # Also set page._chart to the newly (last) created Highcharts::Chart.
       # Also set page._char_id to the id of the new (last) chart.
-      @highchart = Highcharts::Chart.new(@chart_options.to_h)
-      page._charts << Volt::Model.new({id: @id, chart: @highchart})
-      page._chart = @highchart
+      @chart = Highcharts::Chart.new(@options.to_h)
+      page._charts << Volt::Model.new({id: @id, chart: @chart})
+      page._chart = @chart
       page._chart_id = @id
 
-      Volt.logger.debug("#{self.class.name}##{__method__}:#{__LINE__} : page._chart='#{page._chart}'")
-      Volt.logger.debug("#{self.class.name}##{__method__}:#{__LINE__} : page._charts='#{page._charts}' page._charts.size=#{page._charts.size}")
-      Volt.logger.debug("#{self.class.name}##{__method__}:#{__LINE__} : @highchart.series=#{@highchart.series}")
-      Volt.logger.debug("#{self.class.name}##{__method__}:#{__LINE__} : @highchart.series names=#{@highchart.series.map(&:name)}")
-      Volt.logger.debug("#{self.class.name}##{__method__}:#{__LINE__} : @highchart.series[0].data=#{@highchart.series[0].data}")
-      Volt.logger.debug("#{self.class.name}##{__method__}:#{__LINE__} : @highchart.options=#{@highchart.options}")
-      Volt.logger.debug("#{self.class.name}##{__method__}:#{__LINE__} : @highchart.options.colors=#{@highchart.options.colors}")
+      # keep an eye on the model for changes
+      start_watching
     end
 
     def before_index_remove
@@ -68,18 +63,53 @@ module Highcharts
         page._chart_id = last ? last._id : nil
         page._chart = last ? last._chart : nil
       end
-      @id = @highchart = nil
+      @id = @chart = @options = nil
     end
 
     private
 
-
-
     def start_watching
-      return unless reactive
+      @watches = []
+      if reactive
+        watch_titles
+        watch_series
+      end
+    end
+
+    def watch_titles
+      @watches << -> do
+        @chart.chart.set_title(
+          @options._title._text,
+          @options._subtitle._text,
+          true # redraw
+        )
+      end.watch!
+    end
+
+    def watch_series
+      @series_size = options._series.size
+      @watches << -> do
+        size = options._series.size
+        if size == @series_size
+          options._series.each_with_index do |series, index|
+            @watches << -> do
+              log_change "@@@  options._series[#{index}] changed", series
+              @watches << -> do
+                data = series._data
+                log_change "@@@ options._series[#{index}]._data changed", data
+              end.watch!
+            end.watch!
+          end
+        else
+          log_change "@@@  options._series.size changed to ", size
+          @series_size = size
+        end
+      end.watch!
     end
 
     def stop_watching
+      @watches.each {|w| w.stop}
+      @watches = []
     end
 
     # Generate a reasonably unique id for chart container.
