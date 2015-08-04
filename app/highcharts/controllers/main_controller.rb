@@ -78,7 +78,7 @@ module Highcharts
 
     def watch_titles
       @watches << -> do
-        @chart.chart.set_title(
+        @chart.set_title(
           @options._title._text,
           @options._subtitle._text,
           true # redraw
