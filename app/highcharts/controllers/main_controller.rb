@@ -107,6 +107,10 @@ module Highcharts
       end.watch!
     end
 
+    def log_change(label, object)
+        Volt.logger.debug "#{self.class.name}##{__method__} : #{label} : #{object}"
+    end
+
     def stop_watching
       @watches.each {|w| w.stop}
       @watches = []
