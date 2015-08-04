@@ -78,10 +78,12 @@ module Highcharts
 
     def watch_titles
       @watches << -> do
-        log_change "#{self.class.name}##{__method__}:#{__LINE__} : set_title(#{@options._title._text}, #{@options._subtitle._text})"
+        log_change "#{self.class.name}##{__method__}:#{__LINE__} : set_title(#{@options._title} #{@options._subtitle})"
+        @options.title._text
+        @options.subtitle._text
         @chart.set_title(
-          @options._title._text,
-          @options._subtitle._text,
+          @options._title,
+          @options._subtitle,
           true # redraw
         )
       end.watch!
