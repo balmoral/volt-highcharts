@@ -82,8 +82,8 @@ module Highcharts
         @options._title._text
         @options._subtitle._text
         @chart.set_title(
-          @options._title,
-          @options._subtitle,
+          @options._title.to_h,
+          @options._subtitle.to_h,
           true # redraw
         )
       end.watch!
