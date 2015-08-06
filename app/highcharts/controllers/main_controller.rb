@@ -100,7 +100,7 @@ module Highcharts
           until chart.series.empty? do
             chart.series.last.remove(false)
           end
-          _series.each_with_index do |a_series|
+          _series.each do |a_series|
             chart.add_series(a_series, false)
           end
           chart.redraw
