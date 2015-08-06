@@ -97,7 +97,7 @@ module Highcharts
           end
         else
           log_change "@@@  _series.size changed to ", size
-          until chart.series.empty? do |i|
+          until chart.series.empty? do
             chart.series.last.remove(false)
           end
           _series.each_with_index do |a_series|
