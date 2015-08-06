@@ -68,7 +68,7 @@ module Highcharts
         [_title, _subtitle].each do |t|
           t.attributes.each { |k,v|
             debug __method__, __LINE__, "#{t}.send(#{k})"
-            t.send k
+            t.send :"_#{k}"
           }
         end
         log_change "#{self.class.name}##{__method__}:#{__LINE__} : chart.set_title(#{_title.to_h} #{_subtitle.to_h})"
