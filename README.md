@@ -1,5 +1,7 @@
 # Volt::Highcharts
 
+[![Join the chat at https://gitter.im/balmoral/volt-highcharts](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/balmoral/volt-highcharts?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 A Volt component wrapping the Highcharts javascript charting tool.
 
 It depends on opal-highcharts, a gem which wraps most Highcharts and Highstock functionality in a client-side Ruby API.
