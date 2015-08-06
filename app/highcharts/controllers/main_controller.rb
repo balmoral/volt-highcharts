@@ -69,7 +69,6 @@ module Highcharts
         # debug __method__, __LINE__, "watch_counts[:titles]=>#{watch_counts[:titles]}"
         log_change "#{self.class.name}##{__method__}:#{__LINE__} : chart.set_title(#{title.to_h} #{subtitle.to_h})"
         chart.set_title(title.to_h, subtitle.to_h, true) # redraw
-        watch_counts[:titles] += 1
       end.watch!
     end
 
