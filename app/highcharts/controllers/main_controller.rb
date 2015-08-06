@@ -97,19 +97,23 @@ module Highcharts
           end
         else
           log_change "@@@  _series.size changed to ", size
-          until chart.series.empty? do
-            debug __method__, __LINE__, "chart.series[#{chart.series.size-1}].remove"
-            chart.series.last.remove(false)
-          end
-          _series.each_with_index do |a_series, index|
-            debug __method__, __LINE__, "chart.add_series ##{index}"
-            chart.add_series(a_series, false)
-          end
-          debug __method__, __LINE__, "chart.redraw"
-          chart.redraw
           @series_size = size
+          redraw_all_series
         end
       end.watch!
+    end
+
+    def redraw_all_series
+      until chart.series.empty? do
+        debug __method__, __LINE__, "chart.series[#{chart.series.size-1}].remove"
+        chart.series.last.remove(false)
+      end
+      _series.each_with_index do |a_series, index|
+        debug __method__, __LINE__, "chart.add_series ##{index}"
+        chart.add_series(a_series.to_h, false)
+      end
+      debug __method__, __LINE__, "chart.redraw"
+      chart.redraw
     end
 
     # Force computation dependencies for attributes of a model
