@@ -2,9 +2,13 @@
 
 A Volt component wrapping the Highcharts javascript charting tool.
 
+It depends on opal-highcharts, a gem which wraps most Highcharts and Highstock functionality in a client-side Ruby API.
+
 Highcharts is free for non-commercial use.
 
 http://www.highcharts.com/products/highcharts
+http://github.com/balmoral/volt-highcharts
+https://rubygems.org/gems/volt-highcharts
 
 ## Installation
 
@@ -40,6 +44,10 @@ where `chart_options` is provided by your controller or model. Any object which 
 
 Documentation for Highcharts options can be found at: http://api.highcharts.com/highcharts#chart.
 
+Reactivity is now supported (currently limited to chart titles, number of series, and series options and data).
+
+To implement a reactive chart, the options provided on chart creation should be wrapped on a Volt::Model which the _reactive attribute set to true.
+  
 At present only a copy of the chart options are passed to Highcharts so the binding will not update the chart automatically.
  
 For convenience, the last chart added can simply be accessed as ```page._chart```, wrapped by Opal's Native().

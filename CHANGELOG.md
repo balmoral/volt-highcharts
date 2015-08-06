@@ -3,7 +3,9 @@
 ## 0.1.1
 
 - now uses opal-highcharts gem  
-- first steps towards finer grained reactivitiy
+- first steps towards reactivitiy
+- a chart is reactive if options are provided as a Volt::Model
+- a chart is non-reactive if options are provided as a Hash  
 
 ### opal-highcharts
 a gem which wraps most Highcharts and Highstock functionality in a client-side Ruby API.

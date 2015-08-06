@@ -6,7 +6,7 @@ require 'opal-highcharts'
 module Highcharts
   class MainController < Volt::ModelController
 
-    attr_reader :chart, :watches, :watch_counts
+    attr_reader :chart, :watches, :watch_counts, :reactive
 
     def index_ready
       set_model
@@ -28,13 +28,11 @@ module Highcharts
         raise ArgumentError, 'no options attribute set for :highcharts component'
       end
       # if the options are a Hash then convert to a Volt::Model
-      unless options.is_a?(Volt::Model)
-        # check the reactive option is not true for a Hash
-        if attr.chart[:reactive]
-          raise ArgumentError, ':chart options attribute must be a Volt::Model if [:reactive] is true'
-        end
-        # convert Hash to Volt::Model
+      if options.is_a?(Volt::Model)
+        @reactive = true
+      else
         options = Volt::Model.new(options)
+        @reactive = false
       end
       # set controller's model to options, which captures its methods for self
       self.model = options
@@ -56,7 +54,7 @@ module Highcharts
     def start_watching
       @watches = []
       @watch_counts = {}
-      if _reactive
+      if reactive
         watch_titles
         watch_series
       end
