@@ -63,15 +63,12 @@ module Highcharts
     end
 
     def watch_titles
-      watch_counts[:titles] = 0
       watches << -> do
         title = _title        # force dependency
         subtitle = _subtitle  # force dependency
         # debug __method__, __LINE__, "watch_counts[:titles]=>#{watch_counts[:titles]}"
-        # unless watch_counts[:titles] = 0
-          log_change "#{self.class.name}##{__method__}:#{__LINE__} : watch_counts[:titles]=#{watch_counts[:titles]} set_title(#{title} #{subtitle})"
-          chart.set_title(title.to_h, subtitle.to_h, true) # redraw
-        # end
+        log_change "#{self.class.name}##{__method__}:#{__LINE__} : chart.set_title(#{title.to_h} #{subtitle.to_h})"
+        chart.set_title(title.to_h, subtitle.to_h, true) # redraw
         watch_counts[:titles] += 1
       end.watch!
     end
