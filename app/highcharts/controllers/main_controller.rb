@@ -65,10 +65,9 @@ module Highcharts
     def watch_titles
       watches << -> do
         # force dependencies TODO: must be better way
-        [:_title, :_subtitle].each do |t|
-          title = send t
-          title.attributes.each { |a|
-            debug __method__, __LINE__, "#{title}.send(#{a})"
+        [_title, _subtitle].each do |t|
+          t.attributes.each { |a|
+            debug __method__, __LINE__, "#{t}.send(#{a})"
             t.send a
           }
         end
