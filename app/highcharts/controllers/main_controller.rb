@@ -98,12 +98,16 @@ module Highcharts
         else
           log_change "@@@  _series.size changed to ", size
           @series_size = size
-          redraw_all_series
+          refresh_all_series
         end
       end.watch!
     end
 
-    def redraw_all_series
+    # Do complete refresh of all series:
+    # 1. remove all series from chart with no redraw
+    # 2. add all series in model to chart with no redraw
+    # 3. redraw chart
+    def refresh_all_series
       until chart.series.empty? do
         debug __method__, __LINE__, "chart.series[#{chart.series.size-1}].remove"
         chart.series.last.remove(false)

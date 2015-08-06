@@ -122,9 +122,17 @@ Always use #to_n to convert Ruby data to JS when passing to Highcharts.
 
 In the future we hope to provide a fully wrapped Ruby implementation of Highcharts.
 
+## To do
+
+1. remove debug traces
+2. chart option/configuration checks
+3. improved documentation
+4. improved error handling
+5. finer grained reactivity?
+
 ## Contributing
 
-The author is new to things javascript, opal and volt, so contributions and suggestions are very welcome.
+Contributions, comments and suggestions are welcome.
  
 1. Fork it ( http://github.com/balmoral/volt-highcharts/fork )
 2. Create your feature branch (`git checkout -b my-new-feature`)
