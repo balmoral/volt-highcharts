@@ -97,6 +97,13 @@ module Highcharts
           end
         else
           log_change "@@@  _series.size changed to ", size
+          chart.series.size.times do |i|
+            chart.series[i].remove(false)
+          end
+          _series.each_with_index do |a_series|
+            chart.add_series(a_series, false)
+          end
+          chart.redraw
           @series_size = size
         end
       end.watch!
