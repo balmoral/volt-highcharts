@@ -42,59 +42,81 @@ Pass a Ruby hash containing chart options in the appropriate view html file:
 
 where `chart_options` is a Volt::Model or Hash provided by your controller or model. 
 
-Reactivity is now supported. 
+**Reactivity** is now supported. 
 
 To implement a reactive chart, the options provided on chart creation should be wrapped in a Volt::Model.
 
-NB reactivity is currently limited to chart titles, number of series, and individual series options and data. More coming soon.
+**NB** reactivity is currently limited to chart titles, number of series, and individual series options and data. More coming soon.
   
 Documentation for Highcharts options can be found at: http://api.highcharts.com/highcharts#chart.
 
 For convenience, the last chart added can be accessed as ```page._chart```. 
 The object returned is a Highcharts::Chart, which can be used to directly query and manipulate the chart (see opal-highcharts).
  
-To query or modify multiple chart(s) on the page a unique :id should be set in each chart's options. 
+For example, for your controller:
 
-For example:
 ```
-    def fruit_chart_options
-      Volt::Model.new( {
-        # to identity the chart in volt
-        id: 'fruit_chart',
-        
-        # highcharts options
-        chart: {
-          type: 'bar'
-        },
+class ChartController < Volt::ModelController
+  ...
+  def chart_options
+    Volt::Model.new( {
+
+      # identity the chart in volt
+      id: 'fruit',
+      
+      # highcharts options
+      chart: {
+        type: 'bar',
+        renderTo: 'fruit_chart'
+      },
+      title: {
+        text: 'Fruit Consumption'
+      },
+      xAxis: {
+        categories: %w(Apples Bananas Oranges)
+      },
+      yAxis: {
         title: {
-          text: 'Fruit Consumption'
+            text: 'Fruit eaten'
+        }
+      },
+      series: [
+        {
+          name: 'Jane',
+          data: [1, 0, 4]
         },
-        xAxis: {
-          categories: %w(Apples Bananas Oranges)
+        {
+          name: 'John',
+          data: [5, 7, 3]
         },
-        yAxis: {
-          title: {
-              text: 'Fruit eaten'
-          }
-        },
-        series: [
-          {
-            name: 'Jane',
-            data: [1, 0, 4]
-          },
-          {
-            name: 'John',
-            data: [5, 7, 3]
-          },
-          ...
-        ]
-      } )
-    end
+        ...
+      ]
+    } )
+  end
+end
 ```
 
-You can later find the chart in page._charts, the elements of which are Volt::Model's each having an _id and a _chart attribute.
+and your views .html file
 
-For example, in your controller you might have a method to return the native chart:
+```
+<:Title>
+  volt-highcharts
+<:Body>
+  <span id="fruit_chart" >
+    <:highcharts options="{{ chart_options }}" />
+  </span>
+```
+
+The html element which contains the chart must have an id which matches the `chart: { renderTo: } ` value.
+
+(At present Volt 0.9.5 does not support view bindings for setting element ids, so string literals are required.)
+ 
+To later query or modify multiple chart(s) on a page, a unique `:id` value should be set. 
+  
+You can then find the chart in page._charts, the elements of which are Volt::Model's each having an _id and a _chart attribute.
+
+For example, in your controller you might have a method to return a Highcharts::Chart:
+
 ```
   def find_chart(id)
     # NB use detect, not find
@@ -102,6 +124,7 @@ For example, in your controller you might have a method to return the native cha
     e ? e._chart : nil
   end
 ```
+
 If you only have one chart on the page use ```page._chart```.
 
 With opal-highcharts, which completely wraps the Highcharts API in client-side Ruby (and comes bundled with volt-highcharts),
