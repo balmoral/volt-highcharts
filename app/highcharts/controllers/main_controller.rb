@@ -64,10 +64,8 @@ module Highcharts
 
     def watch_titles
       watches << -> do
-        # force dependencies TODO: must be better way
-        [_title, _subtitle].each do |t|
-          reference_attributes(t)
-        end
+        setup_dependencies(_title)
+        setup_dependencies(_subtitle)
         log_change "#{self.class.name}##{__method__}:#{__LINE__} : chart.set_title(#{_title.to_h} #{_subtitle.to_h})"
         chart.set_title(_title.to_h, _subtitle.to_h, true) # redraw
       end.watch!
@@ -84,7 +82,17 @@ module Highcharts
               watches << -> do
                 data = a_series._data
                 log_change "@@@ _series[#{index}]._data changed", data
+                chart.series[index].set_data(data.to_a)
               end.watch!
+              watches << -> do
+                title = a_series._title
+                log_change "@@@ _series[#{index}]._title changed", title
+              end.watch!
+              watches << -> do
+                setup_dependencies(a_series, nest: true, except: [:title, :data])
+                log_change "@@@ _series[#{index}] something other than _title or _data changed", nil
+                # chart.series[index].update(_series.to_h)
+              end
             end.watch!
           end
         else
@@ -94,11 +102,16 @@ module Highcharts
       end.watch!
     end
 
-    def reference_attributes(model, except = [])
-      model.attributes.each { |k,v|
-        unless except.include?(k)
-          debug __method__, __LINE__, "#{model}.send(#{k})"
-          model.send :"_#{k}"
+    # Force computation dependencies for attributes of a model
+    # TODO: must be better or built-in way ??
+    def setup_dependencies(model, nest: true, except: [])
+      model.attributes.each { |key, val|
+        unless except.include?(key)
+          debug __method__, __LINE__, "#{model}.send(#{key})"
+          model.send :"_#{key}"
+        end
+        if nest && val.is_a?(Volt::Model)
+          setup_dependencies(val, nest: true, except: except)
         end
       }
     end
