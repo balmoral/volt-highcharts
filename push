@@ -1,4 +1,4 @@
-sh commit
+sh build
 # git remote add origin https://github.com/balmoral/volt-highcharts.git
 # git push -u origin master
 git push
