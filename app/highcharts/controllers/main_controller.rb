@@ -97,8 +97,8 @@ module Highcharts
     def reference_attributes(model, except = [])
       model.attributes.each { |k,v|
         unless except.include?(k)
-          debug __method__, __LINE__, "#{t}.send(#{k})"
-          t.send :"_#{k}"
+          debug __method__, __LINE__, "#{model}.send(#{k})"
+          model.send :"_#{k}"
         end
       }
     end
