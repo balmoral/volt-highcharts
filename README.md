@@ -40,24 +40,25 @@ Pass a Ruby hash containing chart options in the appropriate view html file:
 <:highcharts chart="{{ chart_options }}" />
 ```
 
-where `chart_options` is provided by your controller or model. Any object which responds to #to_h may be used, including of course a Volt::Model.
+where `chart_options` is a Volt::Model or Hash provided by your controller or model. 
 
+Reactivity is now supported. 
+
+To implement a reactive chart, the options provided on chart creation should be wrapped in a Volt::Model.
+
+NB reactivity is currently limited to chart titles, number of series, and individual series options and data. More coming soon.
+  
 Documentation for Highcharts options can be found at: http://api.highcharts.com/highcharts#chart.
 
-Reactivity is now supported (currently limited to chart titles, number of series, and series options and data).
-
-To implement a reactive chart, the options provided on chart creation should be wrapped on a Volt::Model which the _reactive attribute set to true.
-  
-At present only a copy of the chart options are passed to Highcharts so the binding will not update the chart automatically.
- 
-For convenience, the last chart added can simply be accessed as ```page._chart```, wrapped by Opal's Native().
+For convenience, the last chart added can be accessed as ```page._chart```. 
+The object returned is a Highcharts::Chart, which can be used to directly query and manipulate the chart (see opal-highcharts).
  
 To query or modify multiple chart(s) on the page a unique :id should be set in each chart's options. 
 
 For example:
 ```
     def fruit_chart_options
-      {
+      Volt::Model.new( {
         # to identity the chart in volt
         id: 'fruit_chart',
         
@@ -87,7 +88,7 @@ For example:
           },
           ...
         ]
-      }
+      } )
     end
 ```
 
@@ -103,33 +104,11 @@ For example, in your controller you might have a method to return the native cha
 ```
 If you only have one chart on the page use ```page._chart```.
 
-You can dynamically query or modify the chart(s) using Opal's Native() or inline scripting.
+With opal-highcharts, which completely wraps the Highcharts API in client-side Ruby (and comes bundled with volt-highcharts),
+you now have simple access to query and modify methods on the chart and all of its elements. No Native wraps or backticks required. 
 
-The chart object(s) found in ```page._chart``` and ```page._charts``` have been wrapped in Opal's Native(). This is because Volt::Model and Volt::ArrayModel can only hold Ruby objects.   
-
-Opal's Native() wraps a JS object to provide access to properties and functions in the JS object via Ruby method calls. As of writing (July 30, 2015) Native has not yet been documented. If you prefer to use backticks or %x{} to inline JS code you can get the JS object using #to_n.
-
-For example, to change a series in a chart using Native(), you might do:
-```
-  def update_sales
-    e = page._charts.find { |e| e._id == 'sales' }
-    series = Native(e._chart.series)
-    Native(series[0]).setData(sales_data.to_n)
-  end
-```
-The equivalent using backticks is:
-```
-  def update_sales
-    native_chart = page._chart.to_n # get the native JS chart
-    native_data = sales_data.to_n # get native sales data
-    `native_chart.series[0].setData(native_data)`
-  end
-```
-
-Always use #to_n to convert Ruby data to JS when passing to Highcharts.
-
-In the future we hope to provide a fully wrapped Ruby implementation of Highcharts.
-
+As reactivity support is improved, there should be less need for direct manipulation of the chart.
+ 
 ## To do
 
 1. remove debug traces
