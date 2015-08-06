@@ -98,11 +98,14 @@ module Highcharts
         else
           log_change "@@@  _series.size changed to ", size
           until chart.series.empty? do
+            debug __method__, __LINE__, "chart.series[#{chart.series.size-1}].remove"
             chart.series.last.remove(false)
           end
-          _series.each do |a_series|
+          _series.each_with_index do |a_series, index|
+            debug __method__, __LINE__, "chart.add_series ##{index}"
             chart.add_series(a_series, false)
           end
+          debug __method__, __LINE__, "chart.redraw"
           chart.redraw
           @series_size = size
         end
