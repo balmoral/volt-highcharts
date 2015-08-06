@@ -66,8 +66,10 @@ module Highcharts
       watches << -> do
         # force dependencies TODO: must be better way
         [:_title, :_subtitle].each do |t|
-          debug __method__, __LINE__, "#{t}.send(#{a})"
-          t.attributes.each { |a| t.send a }
+          t.attributes.each { |a|
+            debug __method__, __LINE__, "#{t}.send(#{a})"
+            t.send a
+          }
         end
         log_change "#{self.class.name}##{__method__}:#{__LINE__} : chart.set_title(#{_title.to_h} #{_subtitle.to_h})"
         chart.set_title(_title.to_h, _subtitle.to_h, true) # redraw
