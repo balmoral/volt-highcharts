@@ -66,10 +66,7 @@ module Highcharts
       watches << -> do
         # force dependencies TODO: must be better way
         [_title, _subtitle].each do |t|
-          t.attributes.each { |k,v|
-            debug __method__, __LINE__, "#{t}.send(#{k})"
-            t.send :"_#{k}"
-          }
+          reference_attributes(t)
         end
         log_change "#{self.class.name}##{__method__}:#{__LINE__} : chart.set_title(#{_title.to_h} #{_subtitle.to_h})"
         chart.set_title(_title.to_h, _subtitle.to_h, true) # redraw
@@ -95,6 +92,15 @@ module Highcharts
           @series_size = size
         end
       end.watch!
+    end
+
+    def reference_attributes(model, except = [])
+      model.attributes.each { |k,v|
+        unless except.include?(k)
+          debug __method__, __LINE__, "#{t}.send(#{k})"
+          t.send :"_#{k}"
+        end
+      }
     end
 
     def stop_watching
