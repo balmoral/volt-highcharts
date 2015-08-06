@@ -1,5 +1,3 @@
-
-
 if RUBY_PLATFORM == 'opal'
 
 require 'native'
@@ -8,120 +6,122 @@ require 'opal-highcharts'
 module Highcharts
   class MainController < Volt::ModelController
 
-    attr_reader :watches, :options, :reactive
-
-    def initialize(*args)
-      super
-      @watches = []
-      @options = nil
-    end
+    attr_reader :chart, :watches, :watch_counts
 
     def index_ready
-      # Volt.logger.debug("#{self.class.name}##{__method__}:#{__LINE__} : #{Time.now}")
-
-      @options = attrs.options
-      unless @options
-        raise ArgumentError, "no options attribute set for :charts component"
-      end
-      unless @options.is_a?(Volt::Model)
-        if attr.chart[:reactive]
-          raise ArgumentError, ":charts options attribute must be a Volt::Model if :reactive is true"
-        end
-        # now convert to a Volt::Model for consistency
-        @options = Volt::Model.new(@options)
-      end
-      # if if not given, then create one
-      @id = options._id || random_id
-      @reactive = options._reactive
-
-      # Create the chart and add it to the page._charts.
-      # page._charts ia an array of Volt::Models with an id and a chart attribute.
-      # Also set page._chart to the newly (last) created Highcharts::Chart.
-      # Also set page._char_id to the id of the new (last) chart.
-      @chart = Highcharts::Chart.new(@options.to_h)
-      page._charts << Volt::Model.new({id: @id, chart: @chart})
-      page._chart = @chart
-      page._chart_id = @id
-
-      # keep an eye on the model for changes
+      set_model
+      create_chart
       start_watching
     end
 
     def before_index_remove
       stop_watching
-      # Volt.logger.debug("#{self.class.name}##{__method__}:#{__LINE__} #{Time.now}")
-      # clear all references to this chart
-      i = page._charts.find_index { |e| e._id == @id }
-      if i
-        deleted = page._charts.delete_at(i)
-        # Volt.logger.debug("#{self.class.name}##{__method__}:#{__LINE__} : deleted='#{deleted}' page._charts.size=#{page._charts.size}")
-        deleted._chart.destroy
-        deleted._chart = nil
-      end
-      if page._chart_id == @id
-        last = page._charts.last
-        page._chart_id = last ? last._id : nil
-        page._chart = last ? last._chart : nil
-      end
-      @id = @chart = @options = nil
+      update_page
+      @chart = nil
     end
 
     private
 
+    def set_model
+      options = attrs.options
+      unless options
+        raise ArgumentError, 'no options attribute set for :highcharts component'
+      end
+      # if the options are a Hash then convert to a Volt::Model
+      unless options.is_a?(Volt::Model)
+        # check the reactive option is not true for a Hash
+        if attr.chart[:reactive]
+          raise ArgumentError, ':chart options attribute must be a Volt::Model if [:reactive] is true'
+        end
+        # convert Hash to Volt::Model
+        options = Volt::Model.new(options)
+      end
+      # set controller's model to options, which captures its methods for self
+      self.model = options
+      debug __method__, __LINE__, "model._id = #{_id}"
+    end
+
+    # Create the chart and add it to the page._charts.
+    # page._charts ia an array of Volt::Models with an id and a chart attribute.
+    # Also set page._chart to the newly (last) created Highcharts::Chart.
+    # Also set page._char_id to the id of the new (last) chart.
+    def create_chart
+      @chart = Highcharts::Chart.new(model.to_h)
+      page._charts << {id: _id, chart: @chart}
+      page._chart = @chart
+      page._chart_id = _id
+    end
+
+    # To be reactive we must watch for model changes
     def start_watching
       @watches = []
-      if reactive
+      @watch_counts = {}
+      if _reactive
         watch_titles
         watch_series
       end
     end
 
     def watch_titles
-      @watches << -> do
-        log_change "#{self.class.name}##{__method__}:#{__LINE__} : set_title(#{@options._title} #{@options._subtitle})"
-        @options._title._text
-        @options._subtitle._text
-        @chart.set_title(
-          @options._title.to_h,
-          @options._subtitle.to_h,
-          true # redraw
-        )
+      watch_counts[:titles] = 0
+      watches << -> do
+        unless watch_counts[:titles] = 0
+          log_change "#{self.class.name}##{__method__}:#{__LINE__} : watch_count[:titles]=#{watch_count[:titles]} set_title(#{@options._title} #{@options._subtitle})"
+          chart.set_title(_title.to_h, _subtitle.to_h, true) # redraw
+        end
+        watch_counts[:titles] += 1
       end.watch!
     end
 
     def watch_series
-      @series_size = options._series.size
-      @watches << -> do
-        size = options._series.size
+      @series_size = _series.size
+      watches << -> do
+        size = _series.size
         if size == @series_size
-          options._series.each_with_index do |series, index|
-            @watches << -> do
-              log_change "@@@  options._series[#{index}] changed", series
-              @watches << -> do
-                data = series._data
-                log_change "@@@ options._series[#{index}]._data changed", data
+          _series.each_with_index do |a_series, index|
+            watches << -> do
+              log_change "@@@  _series[#{index}] changed", a_series
+              watches << -> do
+                data = a_series._data
+                log_change "@@@ _series[#{index}]._data changed", data
               end.watch!
             end.watch!
           end
         else
-          log_change "@@@  options._series.size changed to ", size
+          log_change "@@@  _series.size changed to ", size
           @series_size = size
         end
       end.watch!
     end
 
-    def log_change(label, object = 'nil')
-        Volt.logger.debug "#{self.class.name}##{__method__} : #{label} : #{object}"
-    end
-
     def stop_watching
       @watches.each {|w| w.stop}
-      @watches = []
+      @watches = @watch_counts = nil
     end
 
-    # Generate a reasonably unique id for chart container.
-    def random_id
-      "hc_#{(rand * 1000000000).to_i}"
+    def update_page
+      debug __method__, _LINE__, Time.now.to_s
+      # clear all references to this chart
+      i = page._charts.find_index { |e| e._id == _id }
+      if i
+        deleted = page._charts.delete_at(i)
+        debug __method__, __LINE__, "deleted='#{deleted}' page._charts.size=#{page._charts.size}"
+        deleted._chart.destroy
+        deleted._chart = nil
+      end
+      if page._chart_id == _id
+        last = page._charts.last
+        page._chart_id = last ? last._id : nil
+        page._chart = last ? last._chart : nil
+      end
+    end
+
+    def debug(method, line, s)
+      Volt.logger.debug "#{self.class.name}##{method}[#{line}] : #{s}"
+    end
+
+    def log_change(label, object = 'nil')
+      Volt.logger.debug "#{label} : #{object}"
     end
 
   end
