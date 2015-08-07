@@ -90,7 +90,7 @@ module Highcharts
               owner + '._id',
               owner + '._data',
             ]
-            watch_attributes(owner, a_series, nest: true, except: exceptions) do |key, value|
+            watch_attributes(owner, a_series, nest: true, except: []) do |key, value|
               debug __method__, __LINE__, "#{key} CHANGED => updating series"
               chart.series[index].update(_series.to_h, true)
             end
