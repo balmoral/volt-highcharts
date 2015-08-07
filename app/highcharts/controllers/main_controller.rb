@@ -73,17 +73,18 @@ module Highcharts
       watches << -> do
         # size = _series.size
         # if size == @series_size
-          _series.each_with_index do |a_series, index|
+          _series.size.times do |index|
             watches << -> do
               # watches << -> do
               #  debug "-> series[#{index}] data", __LINE__
+              # a_series = _series[index]
               #  data = a_series._data
               #  chart.series[index].set_data(data.to_a, true, animate)
               # end.watch!
               watches << -> do
                 debug "-> something in series#{index} other than data", __LINE__
-                x_series = _series[index]
-                setup_dependencies(x_series, nest: true, except: [:title, :data])
+                a_series = _series[index]
+                setup_dependencies(a_series, nest: true, except: [:title, :data])
                 chart.series[index].update(_series.to_h, true)
               end
             end.watch!
