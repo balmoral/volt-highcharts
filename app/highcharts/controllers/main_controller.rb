@@ -101,7 +101,7 @@ module Highcharts
             setup_dependencies(a_series, nest: true, except: [:data])
             chart.series[index].update(_series.to_h, true)
           end.watch!
-        end.watch!
+        end
       end.watch!
       # @each_series_watch = watches.last
     end
