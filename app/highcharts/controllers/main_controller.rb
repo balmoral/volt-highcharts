@@ -129,7 +129,7 @@ module Highcharts
               watch_attributes("#{owner}[#{i}]", e, nest: nest, &block)
             end
           end
-      elsif
+      else
         model.attributes.each do |attr, val|
           method = :"_#{attr}"
           key = "#{owner}.#{method}"
