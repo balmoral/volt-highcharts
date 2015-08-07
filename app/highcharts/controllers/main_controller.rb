@@ -97,7 +97,7 @@ module Highcharts
         end.watch!
         watches << -> do
           debug __method__, __LINE__, "series[#{index}] something other than data changed"
-          setup_dependencies(_series[index], nest: true, except: [:data])
+          setup_dependencies(a_series, nest: true, except: [:data])
           chart.series[index].update(_series.to_h, true)
         end.watch!
       end
