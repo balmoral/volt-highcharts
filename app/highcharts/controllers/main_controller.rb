@@ -85,7 +85,7 @@ module Highcharts
               #  chart.series[index].set_data(data.to_a, true, animate)
               # end.watch!
             # end.watch!
-            watch_attributes(owner, a_series, nest: true) do |key, value|
+            watch_attributes("_series[#{index}]", a_series, nest: true) do |key, value|
               case
                 when key =~ /_series\[.*\]\._data/
                   index = [/\[(.*)\]/][1].to_i
