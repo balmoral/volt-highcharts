@@ -77,7 +77,7 @@ module Highcharts
       @series_size = _series.size
       watches << -> do
         unless _series.size == @series_size
-          @each_series_watch.stop if @each_series_watch
+          # @each_series_watch.stop if @each_series_watch
           @series_size = _series.size
           refresh_all_series
         end
@@ -100,7 +100,7 @@ module Highcharts
           end.watch!
         end.watch!
       end
-      @each_series_watch = watches.last
+      # @each_series_watch = watches.last
     end
 
     # Do complete refresh of all series:
