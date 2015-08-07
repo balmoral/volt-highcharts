@@ -125,7 +125,7 @@ module Highcharts
         unless except.include?(key)
           watches -> do
             debug 'watch!', __LINE__, "#{key} CHANGED"
-            yield key, model.send(method)
+            block.call key, model.send(method)
           end.watch!
           if nest && val.is_a?(Volt::Model)
             watch_attributes(key, nest: true, except: except, &block)
