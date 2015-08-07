@@ -97,7 +97,7 @@ module Highcharts
             debug __method__, __LINE__, "series[#{index}] something changed"
             setup_dependencies(_series[index], nest: true, except: [:data])
             chart.series[index].update(_series.to_h, true)
-          end
+          end.watch!
         end.watch!
       end
       @each_series_watch = watches.last
