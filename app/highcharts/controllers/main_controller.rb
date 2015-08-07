@@ -87,7 +87,7 @@ module Highcharts
     def watch_each_series
       watches << -> do
         debug __method__, __LINE__
-        @series_size.times do |index|
+        _series.size.times do |index|
           watches << -> do
             debug __method__, __LINE__, "series[#{index}],_data changed"
             data = _series[index]._data
