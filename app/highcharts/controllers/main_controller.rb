@@ -148,7 +148,7 @@ module Highcharts
         name = "#{owner_name}.#{method}"
         watch_attribute(name, model, method)
         if nest && (val.is_a?(Volt::Model) || val.is_a?(Volt::ArrayModel))
-          watch_attributes(name, val, nest: true, except: except)
+          watch_attributes(name, val, nest: true)
         end
       end
     end
