@@ -114,8 +114,10 @@ module Highcharts
     # Force computation dependencies for attributes of a model
     # TODO: must be better or built-in way ??
     def setup_dependencies(model, nest: true, except: [])
+      debug "-> series[?]._#{model} changed", __LINE__
       model.attributes.each { |key, val|
         unless except.include?(key)
+          debug "-> series[?]._#{key} changed", __LINE__
           model.send :"_#{key}"
         end
         if nest && val.is_a?(Volt::Model)
