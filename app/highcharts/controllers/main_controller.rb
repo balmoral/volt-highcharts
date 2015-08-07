@@ -89,21 +89,18 @@ module Highcharts
 
     def watch_each_series
       debug __method__, __LINE__
-      watches << -> do
-        debug __method__, __LINE__
-        @series_size.times do |index|
-          a_series = _series[index]
-          watches << -> do
-            # debug __method__, __LINE__, "series[#{index}],_data changed"
-            chart.series[index].set_data(a_series._data.to_a, true, animate)
-          end.watch!
-          watches << -> do
-            debug __method__, __LINE__, "series[#{index}] something other than data changed"
-            setup_dependencies(a_series, nest: true, except: [:data])
-            chart.series[index].update(_series.to_h, true)
-          end.watch!
-        end
-      end.watch!
+      @series_size.times do |index|
+        a_series = _series[index]
+        watches << -> do
+          # debug __method__, __LINE__, "series[#{index}],_data changed"
+          chart.series[index].set_data(a_series._data.to_a, true, animate)
+        end.watch!
+        watches << -> do
+          debug __method__, __LINE__, "series[#{index}] something other than data changed"
+          setup_dependencies(_series[index], nest: true, except: [:data])
+          chart.series[index].update(_series.to_h, true)
+        end.watch!
+      end
       # @each_series_watch = watches.last
     end
 
