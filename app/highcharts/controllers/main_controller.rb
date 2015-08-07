@@ -84,6 +84,7 @@ module Highcharts
     end
 
     def watch_each_series
+      # beware of scope !!
       _series.each_with_index do |outer_series, outer_index|
         debug __method__, __LINE__, "setting watches for series[#{outer_index}]"
         watch_attributes("_series[#{outer_index}]", outer_series, nest: true) do |key, value|
@@ -125,7 +126,7 @@ module Highcharts
         watch_attribute(model, "#{owner}.size", :size, &block)
         if nest
           model.each_with_index do |e,i|
-            if nest && (e.is_a?(Volt::Model) || val.is_a?(Volt::Model))
+            if nest && (e.is_a?(Volt::Model) || val.is_a?(Volt::ArrayModel))
               watch_attributes("#{owner}[#{i}]", e, nest: nest, &block)
             end
           end
@@ -135,16 +136,13 @@ module Highcharts
           method = :"_#{attr}"
           key = "#{owner}.#{method}"
           watch_attribute(model, key, method, &block)
-          if nest && (val.is_a?(Volt::Model) || val.is_a?(Volt::Model))
+          if nest && (val.is_a?(Volt::Model) || val.is_a?(Volt::ArrayModel))
             watch_attributes(key, nest: true, except: except, &block)
           end
         end
       end
     end
 
-    # Having watch_attribute in separate method ensures
-    # correct scope of local variables for the proc
-    # being watched.
     def watch_attribute(model, key, method, &block)
       watches << -> do
         debug 'watch!', __LINE__, "#{key} CHANGED"
