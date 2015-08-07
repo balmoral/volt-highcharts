@@ -76,12 +76,13 @@ module Highcharts
           _series.each_with_index do |a_series, index|
             watches << -> do
               watches << -> do
-                debug '-> series data', __LINE__
+                debug "-> series[#{index}] data", __LINE__
                 data = a_series._data
                 chart.series[index].set_data(data.to_a, true, animate)
               end.watch!
               watches << -> do
-                debug '->something in series other than data', __LINE__
+                debug "-> something in series#{index} other than data", __LINE__
+                a_series = _series[index]
                 setup_dependencies(a_series, nest: true, except: [:title, :data])
                 chart.series[index].update(_series.to_h, true)
               end
