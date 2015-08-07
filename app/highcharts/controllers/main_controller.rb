@@ -86,7 +86,7 @@ module Highcharts
     def watch_each_series
       # beware of scope !!
       debug __method__, __LINE__, "setting watches for _series"
-      watch_attributes('_series', _series, nest: true) do |key, value|
+      watch_attributes('_series', _series, nest: true) { |key, value|
         debug __method__, __LINE__, "#{key} CHANGED"
         if key =~ /\[(.*)\]/
           inner_index = key[/\[(.*)\]/][1].to_i
@@ -101,7 +101,7 @@ module Highcharts
         else
           # debug __method__, __LINE__, "#{key} CHANGED => updating all of series[#{inner_index}]"
         end
-      end
+      }
     end
 
     # Do complete refresh of all series:
