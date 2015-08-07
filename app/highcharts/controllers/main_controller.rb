@@ -72,7 +72,7 @@ module Highcharts
       @series_size = _series.size
       watches << -> do
         size = _series.size
-        if size == @series_size
+        if size == @series_size && size == chart.series.size
           _series.each_with_index do |a_series, index|
             watches << -> do
               watches << -> do
