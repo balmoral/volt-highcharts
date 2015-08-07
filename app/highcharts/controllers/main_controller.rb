@@ -71,15 +71,13 @@ module Highcharts
     def watch_series
       @series_size = _series.size
       watches << -> do
-        size = _series.size
-        if size == @series_size
+        # size = _series.size
+        # if size == @series_size
           _series.each_with_index do |a_series, index|
             watches << -> do
               watches << -> do
-                if index < chart.series.size
-                  data = a_series._data
-                  chart.series[index].set_data(data.to_a, true, animate)
-                end
+                data = a_series._data
+                chart.series[index].set_data(data.to_a, true, animate)
               end.watch!
               watches << -> do
                 title = a_series._title
@@ -90,10 +88,10 @@ module Highcharts
               end
             end.watch!
           end
-        else
-          @series_size = size
-          refresh_all_series
-        end
+        # else
+        #  @series_size = size
+        #  refresh_all_series
+        # end
       end.watch!
     end
 
