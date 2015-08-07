@@ -72,12 +72,14 @@ module Highcharts
       @series_size = _series.size
       watches << -> do
         size = _series.size
-        if size == @series_size && size == chart.series.size
+        if size == @series_size
           _series.each_with_index do |a_series, index|
             watches << -> do
               watches << -> do
-                data = a_series._data
-                chart.series[index].set_data(data.to_a, true, animate)
+                if index < chart.series.size
+                  data = a_series._data
+                  chart.series[index].set_data(data.to_a, true, animate)
+                end
               end.watch!
               watches << -> do
                 title = a_series._title
