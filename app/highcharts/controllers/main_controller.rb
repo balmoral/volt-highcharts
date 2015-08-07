@@ -89,7 +89,7 @@ module Highcharts
         watch_attributes("_series[#{index}]", a_series, nest: true) do |key, value|
           index = [/\[(.*)\]/][1].to_i
           case
-            when key =~ /\._data\._id/
+            when key =~ /\._data/
               debug __method__, __LINE__, "chart.series[#{index}].set_data(#{value.to_a})"
               chart.series[index].set_data(value.to_a, true, animate)
             else
@@ -120,11 +120,7 @@ module Highcharts
     # TODO: better or built-in way ??
     def watch_attributes(owner, model, nest: true, &block)
       if model.is_a?(Volt::ArrayModel)
-        key = "#{owner}.size"
-        watches << -> do
-          debug 'watch!', __LINE__, "#{key} CHANGED"
-          block.call key, model
-        end
+        watch_attribute(model, "#{owner}.size", :size, &block)
       else
         model.attributes.each do |attr, val|
           method = :"_#{attr}"
@@ -137,6 +133,9 @@ module Highcharts
       end
     end
 
+    # Having watch_attribute in separate method ensures
+    # correct scope of local variables for the proc
+    # being watched.
     def watch_attribute(model, key, method, &block)
       watches << -> do
         debug 'watch!', __LINE__, "#{key} CHANGED"
