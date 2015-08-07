@@ -69,39 +69,29 @@ module Highcharts
     end
 
     def watch_series
-      debug __method__, __LINE__
-      watch_series_size
-      watch_each_series
-    end
-
-    def watch_series_size
-      debug __method__, __LINE__
       @series_size = _series.size
       watches << -> do
-        unless _series.size == @series_size
-          # @each_series_watch.stop if @each_series_watch
-          debug __method__, __LINE__
-          @series_size = _series.size
+        size = _series.size
+        if size == @series_size
+          _series.each_with_index do |a_series, index|
+            watches << -> do
+              watches << -> do
+                if index < chart.series.size
+                  data = a_series._data
+                  chart.series[index].set_data(data.to_a, true, animate)
+                end
+              end.watch!
+              watches << -> do
+                setup_dependencies(a_series, nest: true, except: [:title, :data])
+                chart.series[index].update(_series.to_h, true)
+              end
+            end.watch!
+          end
+        else
+          @series_size = size
           refresh_all_series
         end
       end.watch!
-    end
-
-    def watch_each_series
-      debug __method__, __LINE__
-      @series_size.times do |index|
-        a_series = _series[index]
-        watches << -> do
-          # debug __method__, __LINE__, "series[#{index}],_data changed"
-          chart.series[index].set_data(a_series._data.to_a, true, animate)
-        end.watch!
-        watches << -> do
-          debug __method__, __LINE__, "series[#{index}] something other than data changed"
-          setup_dependencies(a_series, nest: true, except: [:data])
-          chart.series[index].update(_series.to_h, true)
-        end.watch!
-      end
-      # @each_series_watch = watches.last
     end
 
     # Do complete refresh of all series:
