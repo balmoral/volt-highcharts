@@ -84,24 +84,25 @@ module Highcharts
     end
 
     def watch_each_series
-      # beware of scope !!
       debug __method__, __LINE__, "setting watches for _series"
-      watch_attributes('_series', _series, nest: true) { |key, value|
-        debug __method__, __LINE__, "#{key} CHANGED"
-        if key =~ /\[(.*)\]/
-          inner_index = key[/\[(.*)\]/][1].to_i
-          inner_series = _series[inner_index]
-          if key =~ /\._data/
-            debug __method__, __LINE__, "chart.series[#{inner_index}].set_data(#{value.to_a})"
-            chart.series[inner_index].set_data(value.to_a, true, animate)
-          else
-            debug __method__, __LINE__, "#{key} CHANGED => updating all of series[#{inner_index}]"
-            chart.series[inner_index].update(inner_series.to_h, true)
-          end
+      watch_attributes('_series', _series, nest: true)
+    end
+
+    def process_change(key, value)
+      debug __method__, __LINE__, "#{key} CHANGED"
+      if key =~ /\[(.*)\]/
+        inner_index = key[/\[(.*)\]/][1].to_i
+        inner_series = _series[inner_index]
+        if key =~ /\._data/
+          debug __method__, __LINE__, "chart.series[#{inner_index}].set_data(#{value.to_a})"
+          chart.series[inner_index].set_data(value.to_a, true, animate)
         else
-          # debug __method__, __LINE__, "#{key} CHANGED => updating all of series[#{inner_index}]"
+          debug __method__, __LINE__, "#{key} CHANGED => updating all of series[#{inner_index}]"
+          chart.series[inner_index].update(inner_series.to_h, true)
         end
-      }
+      else
+        # debug __method__, __LINE__, "#{key} CHANGED => updating all of series[#{inner_index}]"
+      end
     end
 
     # Do complete refresh of all series:
@@ -122,40 +123,40 @@ module Highcharts
 
     # Create watches for (nested) attributes of a model.
     # TODO: better or built-in way ??
-    def watch_attributes(name, model, nest: true, &block)
+    def watch_attributes(name, model, nest: true)
       if model.is_a?(Volt::ArrayModel)
-        watch_array_model(name, model, nest: nest, &block)
+        watch_array_model(name, model, nest: nest)
       elsif model.is_a?(Volt::Model)
-        watch_model(name, model, nest: nest, &block)
+        watch_model(name, model, nest: nest)
       end
     end
 
-    def watch_array_model(name, model, nest: true, &block)
-      watch_attribute("#{name}.size", model, :size, &block)
+    def watch_array_model(name, model, nest: true)
+      watch_attribute("#{name}.size", model, :size)
       if nest
         model.each_with_index do |e,i|
           if nest && (e.is_a?(Volt::Model) || val.is_a?(Volt::ArrayModel))
-            watch_attributes("#{name}[#{i}]", e, nest: nest, &block)
+            watch_attributes("#{name}[#{i}]", e, nest: nest)
           end
         end
       end
     end
 
-    def watch_model(owner_name, model, nest: true, &block)
+    def watch_model(owner_name, model, nest: true)
       model.attributes.each do |attr, val|
         method = :"_#{attr}"
         name = "#{owner_name}.#{method}"
-        watch_attribute(name, model, method, &block)
+        watch_attribute(name, model, method)
         if nest && (val.is_a?(Volt::Model) || val.is_a?(Volt::ArrayModel))
-          watch_attributes(name, val, nest: true, except: except, &block)
+          watch_attributes(name, val, nest: true, except: except)
         end
       end
     end
 
-    def watch_attribute(name, model, method, &block)
+    def watch_attribute(name, model, method)
       watches << -> do
         debug 'watch!', __LINE__, "#{name} CHANGED"
-        block.call(name, model.send(method))
+        process_change(name, model.send(method))
       end.watch!
     end
 
