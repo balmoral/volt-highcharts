@@ -121,40 +121,40 @@ module Highcharts
 
     # Create watches for (nested) attributes of a model.
     # TODO: better or built-in way ??
-    def watch_attributes(owner, model, nest: true, &block)
+    def watch_attributes(name, model, nest: true, &block)
       if model.is_a?(Volt::ArrayModel)
-        watch_array_model(owner, model, nest: nest, &block)
-      else
-        watch_model(owner, model, nest: nest, &block)
+        watch_array_model(name, model, nest: nest, &block)
+      elsif model.is_a?(Volt::Model)
+        watch_model(name, model, nest: nest, &block)
       end
     end
 
-    def watch_array_model(owner, model, nest: true, &block)
-      watch_attribute(model, "#{owner}.size", :size, &block)
+    def watch_array_model(name, model, nest: true, &block)
+      watch_attribute("#{name}.size", model, :size, &block)
       if nest
         model.each_with_index do |e,i|
           if nest && (e.is_a?(Volt::Model) || val.is_a?(Volt::ArrayModel))
-            watch_attributes("#{owner}[#{i}]", e, nest: nest, &block)
+            watch_attributes("#{name}[#{i}]", e, nest: nest, &block)
           end
         end
       end
     end
 
-    def watch_model(owner, model, nest: true, &block)
+    def watch_model(owner_name, model, nest: true, &block)
       model.attributes.each do |attr, val|
         method = :"_#{attr}"
-        key = "#{owner}.#{method}"
-        watch_attribute(model, key, method, &block)
+        name = "#{owner_name}.#{method}"
+        watch_attribute(name, model, method, &block)
         if nest && (val.is_a?(Volt::Model) || val.is_a?(Volt::ArrayModel))
-          watch_attributes(key, val, nest: true, except: except, &block)
+          watch_attributes(name, val, nest: true, except: except, &block)
         end
       end
     end
 
-    def watch_attribute(model, key, method, &block)
+    def watch_attribute(name, model, method, &block)
       watches << -> do
         debug 'watch!', __LINE__, "#{key} CHANGED"
-        block.call key, model.send(method)
+        block.call(key, model.send(method))
       end.watch!
     end
 
