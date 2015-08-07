@@ -61,14 +61,8 @@ module Highcharts
     end
 
     def watch_titles
-      watch_attributes('_title', _title) do |key, value|
-        debug __method__, __LINE__, "#{key} CHANGED => updating titles"
-        chart.set_title(_title.to_h, _subtitle.to_h, true) # redraw
-      end
-      watch_attributes('_subtitle', _subtitle) do |key, value|
-        debug __method__, __LINE__, "#{key} CHANGED => updating titles"
-        chart.set_title(_title.to_h, _subtitle.to_h, true) # redraw
-      end
+      watch_attributes('_title', _title)
+      watch_attributes('_subtitle', _subtitle)
     end
 
     def watch_series
@@ -90,7 +84,9 @@ module Highcharts
 
     def process_change(name, value)
       debug __method__, __LINE__, "#{name} CHANGED"
-      if name =~ /_series\[(.*)\]/
+      if name =~ /chart._title/ || name =~ /chart._subtitle/
+        chart.set_title(_title.to_h, _subtitle.to_h, true) # redraw
+      elsif name =~ /_series\[(.*)\]/
         inner_index = name[/\[(.*)\]/][1].to_i
         inner_series = _series[inner_index]
         if name.split('.').last == '_data'
