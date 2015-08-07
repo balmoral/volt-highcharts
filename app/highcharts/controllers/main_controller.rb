@@ -69,50 +69,35 @@ module Highcharts
     end
 
     def watch_series
+      watch_series_size
+      watch_each_series
+    end
+
+    def watch_series_size
       @series_size = _series.size
       watches << -> do
-        size = _series.size
-        if size == @series_size
-          _series.each_with_index do |a_series, index|
-            watches << -> do
-              watches << -> do
-                data = a_series._data
-                chart.series[index].set_data(data.to_a, true, animate)
-              end.watch!
-              watches << -> do
-                title = a_series._title
-              end.watch!
-              watches << -> do
-                setup_dependencies(a_series, nest: true, except: [:title, :data])
-                chart.series[index].update(_series.to_h, true)
-              end
-            end.watch!
-          end
-        else
-          @series_size = size
+        unless _series.size == @series_size
+          @each_series_watch.stop if @each_series_watch
+          @series_size = _series_size
           refresh_all_series
         end
       end.watch!
     end
 
-    def watch_axes
+    def watch_each_series
       watches << -> do
-        _series.each_with_index do |a_series, index|
+        @series_size.times do |index|
           watches << -> do
-            watches << -> do
-              data = a_series._data
-              chart.series[index].set_data(data.to_a)
-            end.watch!
-            watches << -> do
-              title = a_series._title
-            end.watch!
-            watches << -> do
-              setup_dependencies(a_series, nest: true, except: [:title, :data])
-              # chart.series[index].update(_series.to_h)
-            end
+            data = _series[index]._data
+            chart.series[index].set_data(data.to_a, true, animate)
           end.watch!
-        end
-      end.watch!
+          watches << -> do
+            setup_dependencies(_series[index], nest: true, except: [:data])
+            chart.series[index].update(_series.to_h, true)
+          end
+        end.watch!
+      end
+      @each_series_watch = watches.last
     end
 
     # Do complete refresh of all series:
