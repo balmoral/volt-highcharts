@@ -89,6 +89,7 @@ module Highcharts
         watch_attributes("_series[#{outer_index}]", outer_series, nest: true) do |key, value|
           inner_index = [/\[(.*)\]/][1].to_i
           inner_series = _series[inner_index]
+          debug __method__, __LINE__, "#{key} CHANGED"
           case
             when key =~ /\._data/
               debug __method__, __LINE__, "chart.series[#{inner_index}].set_data(#{value.to_a})"
