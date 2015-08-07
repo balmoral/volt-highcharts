@@ -85,6 +85,7 @@ module Highcharts
               watches << -> do
                 debug "-> something in series#{index} other than data changed", __LINE__
                 a_series = _series[index]
+                a_series._type
                 setup_dependencies(a_series, nest: true, except: [:title, :id, :data])
                 chart.series[index].update(_series.to_h, true)
               end
