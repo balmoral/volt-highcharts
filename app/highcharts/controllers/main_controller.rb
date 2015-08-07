@@ -153,8 +153,8 @@ module Highcharts
       end
     end
 
-    def debug(_method, line, s = '')
-      Volt.logger.debug "#{self.class.name}##{_method}[#{line}] : #{s}"
+    def debug(m, line, s = nil)
+      Volt.logger.debug "#{self.class.name}##{m}[#{line}] : #{s}"
     end
 
   end
