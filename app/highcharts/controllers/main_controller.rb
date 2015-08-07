@@ -82,6 +82,9 @@ module Highcharts
                 end
               end.watch!
               watches << -> do
+                title = a_series._title
+              end.watch!
+              watches << -> do
                 setup_dependencies(a_series, nest: true, except: [:title, :data])
                 chart.series[index].update(_series.to_h, true)
               end
