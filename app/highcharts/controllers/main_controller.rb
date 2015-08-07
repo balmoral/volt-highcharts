@@ -87,7 +87,7 @@ module Highcharts
       _series.each_with_index do |outer_series, outer_index|
         debug __method__, __LINE__, "setting watches for series[#{outer_index}]"
         watch_attributes("_series[#{outer_index}]", outer_series, nest: true) do |key, value|
-          inner_index = [/\[(.*)\]/][1].to_i
+          inner_index = key[/\[(.*)\]/][1].to_i
           inner_series = _series[inner_index]
           debug __method__, __LINE__, "#{key} CHANGED"
           case
