@@ -85,14 +85,16 @@ module Highcharts
               #  chart.series[index].set_data(data.to_a, true, animate)
               # end.watch!
             # end.watch!
-            owner = "_series[#{index}]"
-            exceptions = [
-              owner + '._id',
-              owner + '._data',
-            ]
-            watch_attributes(owner, a_series, nest: true, except: []) do |key, value|
-              debug __method__, __LINE__, "#{key} CHANGED => updating series"
-              chart.series[index].update(_series.to_h, true)
+            watch_attributes(owner, a_series, nest: true) do |key, value|
+              case
+                when key =~ /_series\[.*\]\._data/
+                  index = [/\[(.*)\]/][1].to_i
+                  debug __method__, __LINE__, "chart.series[#{index}].set_data(#{value.to_a})"
+                  chart.series[index].set_data(value.to_a, true, animate)
+                else
+                  debug __method__, __LINE__, "#{key} CHANGED => updating series"
+                  chart.series[index].update(_series.to_h, true)
+              end
             end
           end
         # else
@@ -118,18 +120,16 @@ module Highcharts
 
     # Create watches for (nested) attributes of a model.
     # TODO: better or built-in way ??
-    def watch_attributes(owner, model, nest: true, except: [], &block)
+    def watch_attributes(owner, model, nest: true, &block)
       model.attributes.each { |attr, val|
         method = :"_#{attr}"
         key = "#{owner}.#{method}"
-        unless except.include?(key)
-          watches -> do
-            debug 'watch!', __LINE__, "#{key} CHANGED"
-            block.call key, model.send(method)
-          end.watch!
-          if nest && val.is_a?(Volt::Model)
-            watch_attributes(key, nest: true, except: except, &block)
-          end
+        watches -> do
+          debug 'watch!', __LINE__, "#{key} CHANGED"
+          block.call key, model.send(method)
+        end.watch!
+        if nest && val.is_a?(Volt::Model)
+          watch_attributes(key, nest: true, except: except, &block)
         end
       }
     end
