@@ -56,16 +56,16 @@ module Highcharts
       @watch_counts = {}
       if reactive
         watch_titles
-        # watch_series
+        watch_series
       end
     end
 
     def watch_titles
-      setup_dependencies('_title', _title) do |key, value|
+      watch_attributes('_title', _title) do |key, value|
         debug __method__, __LINE__, "#{key} CHANGED => updating titles"
         chart.set_title(_title.to_h, _subtitle.to_h, true) # redraw
       end
-      setup_dependencies('_subtitle', _subtitle) do |key, value|
+      watch_attributes('_subtitle', _subtitle) do |key, value|
         debug __method__, __LINE__, "#{key} CHANGED => updating titles"
         chart.set_title(_title.to_h, _subtitle.to_h, true) # redraw
       end
@@ -91,7 +91,7 @@ module Highcharts
               owner + '._id',
               owner + '._data',
             ]
-            setup_dependencies(owner, a_series, nest: true, except: exceptions) do |key, value|
+            watch_attributes(owner, a_series, nest: true, except: exceptions) do |key, value|
               debug __method__, __LINE__, "#{key} CHANGED => updating series"
               chart.series[index].update(_series.to_h, true)
             end
@@ -117,9 +117,9 @@ module Highcharts
       chart.redraw
     end
 
-    # Force computation dependencies for (nested) attributes of a model
-    # TODO: must be better or built-in way ??
-    def setup_dependencies(owner, model, nest: true, except: [], &block)
+    # Create watches for (nested) attributes of a model.
+    # TODO: better or built-in way ??
+    def watch_attributes(owner, model, nest: true, except: [], &block)
       model.attributes.each { |attr, val|
         method = :"_#{attr}"
         key = "#{owner}.#{method}"
@@ -129,7 +129,7 @@ module Highcharts
             yield key, model.send(method)
           end.watch!
           if nest && val.is_a?(Volt::Model)
-            setup_dependencies(key, nest: true, except: except, &block)
+            watch_attributes(key, nest: true, except: except, &block)
           end
         end
       }
