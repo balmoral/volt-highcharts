@@ -123,22 +123,30 @@ module Highcharts
     # TODO: better or built-in way ??
     def watch_attributes(owner, model, nest: true, &block)
       if model.is_a?(Volt::ArrayModel)
-        watch_attribute(model, "#{owner}.size", :size, &block)
-        if nest
-          model.each_with_index do |e,i|
-            if nest && (e.is_a?(Volt::Model) || val.is_a?(Volt::ArrayModel))
-              watch_attributes("#{owner}[#{i}]", e, nest: nest, &block)
-            end
+        watch_array_model(owner, model, nest: nest, &block)
+      else
+        watch_model(owner, model, nest: nest, &block)
+      end
+    end
+
+    def watch_array_model(owner, model, nest: true, &block)
+      watch_attribute(model, "#{owner}.size", :size, &block)
+      if nest
+        model.each_with_index do |e,i|
+          if nest && (e.is_a?(Volt::Model) || val.is_a?(Volt::ArrayModel))
+            watch_attributes("#{owner}[#{i}]", e, nest: nest, &block)
           end
         end
-      else
-        model.attributes.each do |attr, val|
-          method = :"_#{attr}"
-          key = "#{owner}.#{method}"
-          watch_attribute(model, key, method, &block)
-          if nest && (val.is_a?(Volt::Model) || val.is_a?(Volt::ArrayModel))
-            watch_attributes(key, nest: true, except: except, &block)
-          end
+      end
+    end
+
+    def watch_model(owner, model, nest: true, &block)
+      model.attributes.each do |attr, val|
+        method = :"_#{attr}"
+        key = "#{owner}.#{method}"
+        watch_attribute(model, key, method, &block)
+        if nest && (val.is_a?(Volt::Model) || val.is_a?(Volt::ArrayModel))
+          watch_attributes(key, nest: true, except: except, &block)
         end
       end
     end
