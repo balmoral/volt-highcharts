@@ -135,7 +135,7 @@ module Highcharts
       watch_attribute("#{name}.size", model, :size)
       if nest
         model.each_with_index do |e,i|
-          if nest && (e.is_a?(Volt::Model) || val.is_a?(Volt::ArrayModel))
+          if nest && (e.is_a?(Volt::Model) || e.is_a?(Volt::ArrayModel))
             watch_attributes("#{name}[#{i}]", e, nest: nest)
           end
         end
