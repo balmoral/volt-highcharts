@@ -72,7 +72,7 @@ module Highcharts
     end
 
     def watch_series
-      watch_series_size
+      # watch_series_size
       watch_each_series
     end
 
