@@ -92,7 +92,7 @@ module Highcharts
                   debug __method__, __LINE__, "chart.series[#{index}].set_data(#{value.to_a})"
                   chart.series[index].set_data(value.to_a, true, animate)
                 else
-                  debug __method__, __LINE__, "#{key} CHANGED => updating series"
+                  debug __method__, __LINE__, "#{key} CHANGED => updating ALL series"
                   chart.series[index].update(_series.to_h, true)
               end
             end
