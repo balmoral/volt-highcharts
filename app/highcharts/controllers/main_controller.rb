@@ -102,7 +102,7 @@ module Highcharts
             chart.series[index].update(_series.to_h, true)
           end.watch!
         end.watch!
-      end
+      end.watch!
       # @each_series_watch = watches.last
     end
 
