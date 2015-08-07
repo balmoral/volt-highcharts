@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.1.2
+
+- global animate option
+ 
 ## 0.1.1
 
 - now uses opal-highcharts gem  

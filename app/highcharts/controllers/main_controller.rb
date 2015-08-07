@@ -6,7 +6,7 @@ require 'opal-highcharts'
 module Highcharts
   class MainController < Volt::ModelController
 
-    attr_reader :chart, :watches, :watch_counts, :reactive
+    attr_reader :chart, :watches, :watch_counts, :reactive, :animate
 
     def index_ready
       set_model
@@ -36,7 +36,7 @@ module Highcharts
       end
       # set controller's model to options, which captures its methods for self
       self.model = options
-      debug __method__, __LINE__, "model._id = #{_id}"
+      @animate = _animate == true
     end
 
     # Create the chart and add it to the page._charts.
@@ -64,7 +64,6 @@ module Highcharts
       watches << -> do
         setup_dependencies(_title)
         setup_dependencies(_subtitle)
-        log_change "#{self.class.name}##{__method__}:#{__LINE__} : chart.set_title(#{_title.to_h} #{_subtitle.to_h})"
         chart.set_title(_title.to_h, _subtitle.to_h, true) # redraw
       end.watch!
     end
@@ -76,27 +75,42 @@ module Highcharts
         if size == @series_size
           _series.each_with_index do |a_series, index|
             watches << -> do
-              log_change "@@@  _series[#{index}] changed", a_series
               watches << -> do
                 data = a_series._data
-                log_change "@@@ _series[#{index}]._data changed", data
-                chart.series[index].set_data(data.to_a)
+                chart.series[index].set_data(data.to_a, true, animate)
               end.watch!
               watches << -> do
                 title = a_series._title
-                log_change "@@@ _series[#{index}]._title changed", title
               end.watch!
               watches << -> do
                 setup_dependencies(a_series, nest: true, except: [:title, :data])
-                log_change "@@@ _series[#{index}] something other than _title or _data changed", nil
-                # chart.series[index].update(_series.to_h)
+                chart.series[index].update(_series.to_h, true)
               end
             end.watch!
           end
         else
-          log_change "@@@  _series.size changed to ", size
           @series_size = size
           refresh_all_series
+        end
+      end.watch!
+    end
+
+    def watch_axes
+      watches << -> do
+        _series.each_with_index do |a_series, index|
+          watches << -> do
+            watches << -> do
+              data = a_series._data
+              chart.series[index].set_data(data.to_a)
+            end.watch!
+            watches << -> do
+              title = a_series._title
+            end.watch!
+            watches << -> do
+              setup_dependencies(a_series, nest: true, except: [:title, :data])
+              # chart.series[index].update(_series.to_h)
+            end
+          end.watch!
         end
       end.watch!
     end
@@ -107,14 +121,11 @@ module Highcharts
     # 3. redraw chart
     def refresh_all_series
       until chart.series.empty? do
-        debug __method__, __LINE__, "chart.series[#{chart.series.size-1}].remove"
         chart.series.last.remove(false)
       end
       _series.each_with_index do |a_series, index|
-        debug __method__, __LINE__, "chart.add_series ##{index}"
         chart.add_series(a_series.to_h, false)
       end
-      debug __method__, __LINE__, "chart.redraw"
       chart.redraw
     end
 
@@ -123,7 +134,6 @@ module Highcharts
     def setup_dependencies(model, nest: true, except: [])
       model.attributes.each { |key, val|
         unless except.include?(key)
-          debug __method__, __LINE__, "#{model}.send(#{key})"
           model.send :"_#{key}"
         end
         if nest && val.is_a?(Volt::Model)
@@ -138,12 +148,10 @@ module Highcharts
     end
 
     def update_page
-      debug __method__, _LINE__, Time.now.to_s
       # clear all references to this chart
       i = page._charts.find_index { |e| e._id == _id }
       if i
         deleted = page._charts.delete_at(i)
-        debug __method__, __LINE__, "deleted='#{deleted}' page._charts.size=#{page._charts.size}"
         deleted._chart.destroy
         deleted._chart = nil
       end

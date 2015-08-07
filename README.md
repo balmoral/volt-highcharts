@@ -8,9 +8,12 @@ It depends on opal-highcharts, a gem which wraps most Highcharts and Highstock f
 
 Highcharts is free for non-commercial use.
 
-http://www.highcharts.com/products/highcharts
-http://github.com/balmoral/volt-highcharts
-https://rubygems.org/gems/volt-highcharts
+See
+- http://www.highcharts.com
+- http://github.com/balmoral/volt-highcharts
+- http://github.com/balmoral/opal-highcharts
+- https://rubygems.org/gems/volt-highcharts
+- https://rubygems.org/gems/opal-highcharts
 
 ## Installation
 
@@ -131,8 +134,7 @@ If you only have one chart on the page use ```page._chart```.
 
 With opal-highcharts, which completely wraps the Highcharts API in client-side Ruby (and comes bundled with volt-highcharts),
 you now have simple access to query and modify methods on the chart and all of its elements. No Native wraps or backticks required. 
-
-As reactivity support is improved, there should be less need for direct manipulation of the chart.
+However, as reactivity support is improved, there should be less need for direct manipulation of the chart.
  
 ## To do
 
