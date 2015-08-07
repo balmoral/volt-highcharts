@@ -88,20 +88,20 @@ module Highcharts
       watch_attributes('_series', _series, nest: true)
     end
 
-    def process_change(key, value)
-      debug __method__, __LINE__, "#{key} CHANGED"
-      if key =~ /\[(.*)\]/
-        inner_index = key[/\[(.*)\]/][1].to_i
+    def process_change(name, value)
+      debug __method__, __LINE__, "#{name} CHANGED"
+      if name =~ /_series\[(.*)\]/
+        inner_index = name[/\[(.*)\]/][1].to_i
         inner_series = _series[inner_index]
-        if key =~ /\._data/
+        if name.split('.').last == '_data'
           debug __method__, __LINE__, "chart.series[#{inner_index}].set_data(#{value.to_a})"
           chart.series[inner_index].set_data(value.to_a, true, animate)
         else
-          debug __method__, __LINE__, "#{key} CHANGED => updating all of series[#{inner_index}]"
+          debug __method__, __LINE__, "#{name} CHANGED => updating all of series[#{inner_index}]"
           chart.series[inner_index].update(inner_series.to_h, true)
         end
       else
-        # debug __method__, __LINE__, "#{key} CHANGED => updating all of series[#{inner_index}]"
+        # debug __method__, __LINE__, "#{name} CHANGED => updating all of series[#{inner_index}]"
       end
     end
 
