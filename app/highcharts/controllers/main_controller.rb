@@ -88,7 +88,7 @@ module Highcharts
       debug __method__, __LINE__, "setting watches for _series"
       watch_attributes('_series', _series, nest: true) do |key, value|
         debug __method__, __LINE__, "#{key} CHANGED"
-        if key ~= /\[(.*)\]/
+        if key =~ /\[(.*)\]/
           inner_index = key[/\[(.*)\]/][1].to_i
           inner_series = _series[inner_index]
           if key =~ /\._data/
