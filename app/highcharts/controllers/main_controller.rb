@@ -76,10 +76,8 @@ module Highcharts
           _series.each_with_index do |a_series, index|
             watches << -> do
               watches << -> do
-                if index < chart.series.size
-                  data = a_series._data
-                  chart.series[index].set_data(data.to_a, true, animate)
-                end
+                data = a_series._data
+                chart.series[index].set_data(data.to_a, true, animate)
               end.watch!
               watches << -> do
                 title = a_series._title
