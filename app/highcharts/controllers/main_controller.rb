@@ -89,12 +89,9 @@ module Highcharts
         watch_attributes("_series[#{index}]", a_series, nest: true) do |key, value|
           index = [/\[(.*)\]/][1].to_i
           case
-            when key =~ /\._data/
+            when key =~ /\._data\._id/
               debug __method__, __LINE__, "chart.series[#{index}].set_data(#{value.to_a})"
               chart.series[index].set_data(value.to_a, true, animate)
-            when key =~ /\._id/
-              # do nothing TODO: find out why this happens
-              debug __method__, __LINE__, "ignoring #{key} change"
             else
               debug __method__, __LINE__, "#{key} CHANGED => updating ALL series"
               chart.series[index].update(a_series.to_h, true)
@@ -132,15 +129,19 @@ module Highcharts
         model.attributes.each do |attr, val|
           method = :"_#{attr}"
           key = "#{owner}.#{method}"
-          watches << -> do
-            debug 'watch!', __LINE__, "#{key} CHANGED"
-            block.call key, model.send(method)
-          end.watch!
+          watch_attribute(model, key, method, &block)
           if nest && (val.is_a?(Volt::Model) || val.is_a?(Volt::Model))
             watch_attributes(key, nest: true, except: except, &block)
           end
         end
       end
+    end
+
+    def watch_attribute(model, key, method, &block)
+      watches << -> do
+        debug 'watch!', __LINE__, "#{key} CHANGED"
+        block.call key, model.send(method)
+      end.watch!
     end
 
     def stop_watching
