@@ -123,7 +123,13 @@ module Highcharts
     def watch_attributes(owner, model, nest: true, &block)
       if model.is_a?(Volt::ArrayModel)
         watch_attribute(model, "#{owner}.size", :size, &block)
-      else
+        if nest
+          model.each_with_index do |e,i|
+            if nest && (e.is_a?(Volt::Model) || val.is_a?(Volt::Model))
+              watch_attributes("#{owner}[#{i}]", e, nest: nest, &block)
+            end
+          end
+      elsif
         model.attributes.each do |attr, val|
           method = :"_#{attr}"
           key = "#{owner}.#{method}"
