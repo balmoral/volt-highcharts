@@ -153,7 +153,7 @@ module Highcharts
 
     def watch_attribute(name, model, method, &block)
       watches << -> do
-        debug 'watch!', __LINE__, "#{key} CHANGED"
+        debug 'watch!', __LINE__, "#{name} CHANGED"
         block.call(name, model.send(method))
       end.watch!
     end
