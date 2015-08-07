@@ -76,12 +76,11 @@ module Highcharts
       # watches << -> do
         # size = _series.size
         # if size == @series_size
-          _series.size.times do |index|
+          _series.each_with_index do |a_series, index|
             debug __method__, __LINE__, "setting watches for series[#{index}]"
             # watches << -> do
               # watches << -> do
               #  debug "-> series[#{index}] data changed", __LINE__
-              # a_series = _series[index]
               #  data = a_series._data
               #  chart.series[index].set_data(data.to_a, true, animate)
               # end.watch!
