@@ -61,11 +61,14 @@ module Highcharts
     end
 
     def watch_titles
-      watches << -> do
-        setup_dependencies(_title)
-        setup_dependencies(_subtitle)
+      setup_dependencies('_title', _title) do |key, value|
+        debug __method__, __LINE__, "#{key} CHANGED => updating titles"
         chart.set_title(_title.to_h, _subtitle.to_h, true) # redraw
-      end.watch!
+      end
+      setup_dependencies('_subtitle', _subtitle) do |key, value|
+        debug __method__, __LINE__, "#{key} CHANGED => updating titles"
+        chart.set_title(_title.to_h, _subtitle.to_h, true) # redraw
+      end
     end
 
     def watch_series
