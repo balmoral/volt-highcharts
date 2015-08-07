@@ -72,36 +72,32 @@ module Highcharts
     end
 
     def watch_series
-      @series_size = _series.size
-      # watches << -> do
-        # size = _series.size
-        # if size == @series_size
-          _series.each_with_index do |a_series, index|
-            debug __method__, __LINE__, "setting watches for series[#{index}]"
-            # watches << -> do
-              # watches << -> do
-              #  debug "-> series[#{index}] data changed", __LINE__
-              #  data = a_series._data
-              #  chart.series[index].set_data(data.to_a, true, animate)
-              # end.watch!
-            # end.watch!
-            watch_attributes("_series[#{index}]", a_series, nest: true) do |key, value|
-              case
-                when key =~ /_series\[.*\]\._data/
-                  index = [/\[(.*)\]/][1].to_i
-                  debug __method__, __LINE__, "chart.series[#{index}].set_data(#{value.to_a})"
-                  chart.series[index].set_data(value.to_a, true, animate)
-                else
-                  debug __method__, __LINE__, "#{key} CHANGED => updating ALL series"
-                  chart.series[index].update(a_series.to_h, true)
-              end
-            end
+      watch_series_size
+      watch_each_series
+    end
+
+    def watch_series_size
+      watch_attributes("_series", _series, nest: false) do |key, value|
+        debug __method__, __LINE__, "_series.#{key} changed"
+        refresh_all_series
+      end
+    end
+
+    def watch_each_series
+      _series.each_with_index do |a_series, index|
+        debug __method__, __LINE__, "setting watches for series[#{index}]"
+        watch_attributes("_series[#{index}]", a_series, nest: true) do |key, value|
+          index = [/\[(.*)\]/][1].to_i
+          case
+            when key =~ /\._data/
+              debug __method__, __LINE__, "chart.series[#{index}].set_data(#{value.to_a})"
+              chart.series[index].set_data(value.to_a, true, animate)
+            else
+              debug __method__, __LINE__, "#{key} CHANGED => updating ALL series"
+              chart.series[index].update(a_series.to_h, true)
           end
-        # else
-        #  @series_size = size
-        #  refresh_all_series
-        # end
-      # end.watch!
+        end
+      end
     end
 
     # Do complete refresh of all series:
@@ -109,6 +105,7 @@ module Highcharts
     # 2. add all series in model to chart with no redraw
     # 3. redraw chart
     def refresh_all_series
+      stop_watching
       until chart.series.empty? do
         chart.series.last.remove(false)
       end
@@ -116,22 +113,31 @@ module Highcharts
         chart.add_series(a_series.to_h, false)
       end
       chart.redraw
+      start_watching
     end
 
     # Create watches for (nested) attributes of a model.
     # TODO: better or built-in way ??
     def watch_attributes(owner, model, nest: true, &block)
-      model.attributes.each { |attr, val|
-        method = :"_#{attr}"
-        key = "#{owner}.#{method}"
-        watches -> do
+      if model.is_a?(Volt::ArrayModel)
+        key = "#{owner}.size"
+        watches << -> do
           debug 'watch!', __LINE__, "#{key} CHANGED"
-          block.call key, model.send(method)
-        end.watch!
-        if nest && val.is_a?(Volt::Model)
-          watch_attributes(key, nest: true, except: except, &block)
+          block.call key, model
         end
-      }
+      else
+        model.attributes.each do |attr, val|
+          method = :"_#{attr}"
+          key = "#{owner}.#{method}"
+          watches << -> do
+            debug 'watch!', __LINE__, "#{key} CHANGED"
+            block.call key, model.send(method)
+          end.watch!
+          if nest && (val.is_a?(Volt::Model) || val.is_a?(Volt::Model))
+            watch_attributes(key, nest: true, except: except, &block)
+          end
+        end
+      end
     end
 
     def stop_watching
