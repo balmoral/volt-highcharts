@@ -92,6 +92,9 @@ module Highcharts
             when key =~ /\._data/
               debug __method__, __LINE__, "chart.series[#{index}].set_data(#{value.to_a})"
               chart.series[index].set_data(value.to_a, true, animate)
+            when key =~ /\._id/
+              # do nothing TODO: find out why this happens
+              debug __method__, __LINE__, "ignoring #{key} change"
             else
               debug __method__, __LINE__, "#{key} CHANGED => updating ALL series"
               chart.series[index].update(a_series.to_h, true)
