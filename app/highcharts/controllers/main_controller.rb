@@ -69,15 +69,18 @@ module Highcharts
     end
 
     def watch_series
+      debug __method__, __LINE__
       watch_series_size
       watch_each_series
     end
 
     def watch_series_size
+      debug __method__, __LINE__
       @series_size = _series.size
       watches << -> do
         unless _series.size == @series_size
           # @each_series_watch.stop if @each_series_watch
+          debug __method__, __LINE__
           @series_size = _series.size
           refresh_all_series
         end
@@ -85,17 +88,17 @@ module Highcharts
     end
 
     def watch_each_series
+      debug __method__, __LINE__
       watches << -> do
         debug __method__, __LINE__
-        _series.size.times do |index|
+        _series.each_with_index do |a_series, index|
           watches << -> do
             debug __method__, __LINE__, "series[#{index}],_data changed"
-            data = _series[index]._data
-            chart.series[index].set_data(data.to_a, true, animate)
+            chart.series[index].set_data(a_series._data.to_a, true, animate)
           end.watch!
           watches << -> do
             debug __method__, __LINE__, "series[#{index}] something changed"
-            setup_dependencies(_series[index], nest: true, except: [:data])
+            setup_dependencies(a_series, nest: true, except: [:data])
             chart.series[index].update(_series.to_h, true)
           end.watch!
         end.watch!
@@ -150,7 +153,7 @@ module Highcharts
       end
     end
 
-    def debug(method, line, s)
+    def debug(method, line, s = '')
       Volt.logger.debug "#{self.class.name}##{method}[#{line}] : #{s}"
     end
 
