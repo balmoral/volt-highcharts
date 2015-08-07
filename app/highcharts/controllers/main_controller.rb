@@ -84,7 +84,7 @@ module Highcharts
 
     def process_change(name, value)
       debug __method__, __LINE__, "#{name} CHANGED"
-      if name =~ /chart._title/ || name =~ /chart._subtitle/
+      if name =~ /_title/ || name =~ /_subtitle/
         chart.set_title(_title.to_h, _subtitle.to_h, true) # redraw
       elsif name =~ /_series\[(.*)\]/
         inner_index = name[/\[(.*)\]/][1].to_i
