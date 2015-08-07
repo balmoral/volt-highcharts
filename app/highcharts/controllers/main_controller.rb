@@ -84,17 +84,18 @@ module Highcharts
     end
 
     def watch_each_series
-      _series.each_with_index do |a_series, index|
-        debug __method__, __LINE__, "setting watches for series[#{index}]"
-        watch_attributes("_series[#{index}]", a_series, nest: true) do |key, value|
-          index = [/\[(.*)\]/][1].to_i
+      _series.each_with_index do |outer_series, outer_index|
+        debug __method__, __LINE__, "setting watches for series[#{outer_index}]"
+        watch_attributes("_series[#{outer_index}]", outer_series, nest: true) do |key, value|
+          inner_index = [/\[(.*)\]/][1].to_i
+          inner_series = _series[inner_index]
           case
             when key =~ /\._data/
-              debug __method__, __LINE__, "chart.series[#{index}].set_data(#{value.to_a})"
-              chart.series[index].set_data(value.to_a, true, animate)
+              debug __method__, __LINE__, "chart.series[#{inner_index}].set_data(#{value.to_a})"
+              chart.series[inner_index].set_data(value.to_a, true, animate)
             else
-              debug __method__, __LINE__, "#{key} CHANGED => updating ALL series"
-              chart.series[index].update(a_series.to_h, true)
+              debug __method__, __LINE__, "#{key} CHANGED => updating all of series[#{inner_index}]"
+              chart.series[inner_index].update(inner_series.to_h, true)
           end
         end
       end
