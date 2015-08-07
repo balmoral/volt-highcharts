@@ -75,21 +75,23 @@ module Highcharts
         # if size == @series_size
           _series.size.times do |index|
             debug __method__, __LINE__, "setting watches for series[#{index}]"
-            watches << -> do
+            # watches << -> do
               # watches << -> do
               #  debug "-> series[#{index}] data changed", __LINE__
               # a_series = _series[index]
               #  data = a_series._data
               #  chart.series[index].set_data(data.to_a, true, animate)
               # end.watch!
-              watches << -> do
-                debug "-> something in series#{index} other than data changed", __LINE__
-                a_series = _series[index]
-                a_series._type
-                setup_dependencies(a_series, nest: true, except: [:title, :id, :data])
-                chart.series[index].update(_series.to_h, true)
-              end
-            end.watch!
+            # end.watch!
+            owner = "_series[#{index}]"
+            exceptions = [
+              owner + '._id',
+              owner + '._data',
+            ]
+            setup_dependencies(owner, a_series, nest: true, except: exceptions) do |key, value|
+              debug __method__, __LINE__, "#{key} CHANGED => updating series"
+              chart.series[index].update(_series.to_h, true)
+            end
           end
         # else
         #  @series_size = size
@@ -112,17 +114,20 @@ module Highcharts
       chart.redraw
     end
 
-    # Force computation dependencies for attributes of a model
+    # Force computation dependencies for (nested) attributes of a model
     # TODO: must be better or built-in way ??
-    def setup_dependencies(model, nest: true, except: [])
-      debug "-> series[?]._#{model} changed", __LINE__
-      model.attributes.each { |key, val|
+    def setup_dependencies(owner, model, nest: true, except: [], &block)
+      model.attributes.each { |attr, val|
+        method = :"_#{attr}"
+        key = "#{owner}.#{method}"
         unless except.include?(key)
-          debug "-> series[?]._#{key} changed", __LINE__
-          model.send :"_#{key}"
-        end
-        if nest && val.is_a?(Volt::Model)
-          setup_dependencies(val, nest: true, except: except)
+          watches -> do
+            debug 'watch!', __LINE__, "#{key} CHANGED"
+            yield key, model.send(method)
+          end.watch!
+          if nest && val.is_a?(Volt::Model)
+            setup_dependencies(key, nest: true, except: except, &block)
+          end
         end
       }
     end
