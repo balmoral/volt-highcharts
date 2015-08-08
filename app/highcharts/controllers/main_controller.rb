@@ -78,22 +78,22 @@ module Highcharts
     end
 
     def watch_each_series
-      debug __method__, __LINE__, "setting watches for _series"
+      # debug __method__, __LINE__, "setting watches for _series"
       watch_attributes('_series', _series)
     end
 
     def process_change(name, value)
-      debug __method__, __LINE__, "#{name} CHANGED"
+      # debug __method__, __LINE__, "#{name} CHANGED"
       if name =~ /_title/ || name =~ /_subtitle/
         chart.set_title(_title.to_h, _subtitle.to_h, true) # redraw
       elsif name =~ /_series\[(.*)\]/
         inner_index = name[/\[(.*)\]/][1].to_i
         inner_series = _series[inner_index]
         if name.split('.').last == '_data'
-          debug __method__, __LINE__, "chart.series[#{inner_index}].set_data(#{value.to_a})"
+          # debug __method__, __LINE__, "chart.series[#{inner_index}].set_data(#{value.to_a})"
           chart.series[inner_index].set_data(value.to_a, true, animate)
         else
-          debug __method__, __LINE__, "#{name} CHANGED => updating all of series[#{inner_index}]"
+          # debug __method__, __LINE__, "#{name} CHANGED => updating all of series[#{inner_index}]"
           chart.series[inner_index].update(inner_series.to_h, true)
         end
       else
@@ -151,7 +151,7 @@ module Highcharts
 
     def watch_attribute(name, model, method)
       watches << -> do
-        debug 'watch!', __LINE__, "#{name} CHANGED"
+        # debug 'watch!', __LINE__, "#{name} CHANGED"
         process_change(name, model.send(method))
       end.watch!
     end
