@@ -71,7 +71,7 @@ module Highcharts
     end
 
     def watch_series_size
-      watch_attributes("_series", _series, nest: false) do |key, value|
+      watch_attributes("_series", _series, recurse: false) do |key, value|
         debug __method__, __LINE__, "_series.#{key} changed"
         refresh_all_series
       end
@@ -79,7 +79,7 @@ module Highcharts
 
     def watch_each_series
       debug __method__, __LINE__, "setting watches for _series"
-      watch_attributes('_series', _series, nest: true)
+      watch_attributes('_series', _series)
     end
 
     def process_change(name, value)
@@ -117,34 +117,34 @@ module Highcharts
       start_watching
     end
 
-    # Create watches for (nested) attributes of a model.
+    # Create watches for attributes of a model.
     # TODO: better or built-in way ??
-    def watch_attributes(name, model, nest: true)
+    def watch_attributes(name, model, recurse: true)
       if model.is_a?(Volt::ArrayModel)
-        watch_array_model(name, model, nest: nest)
+        watch_array_model(name, model, recurse: recurse)
       elsif model.is_a?(Volt::Model)
-        watch_model(name, model, nest: nest)
+        watch_model(name, model, recurse: recurse)
       end
     end
 
-    def watch_array_model(name, model, nest: true)
+    def watch_array_model(name, model, recurse: true)
       watch_attribute("#{name}.size", model, :size)
-      if nest
+      if recurse
         model.each_with_index do |e,i|
-          if nest && (e.is_a?(Volt::Model) || e.is_a?(Volt::ArrayModel))
-            watch_attributes("#{name}[#{i}]", e, nest: nest)
+          if e.is_a?(Volt::Model) || e.is_a?(Volt::ArrayModel)
+            watch_attributes("#{name}[#{i}]", e, recurse: recurse)
           end
         end
       end
     end
 
-    def watch_model(owner_name, model, nest: true)
+    def watch_model(owner_name, model, recurse: true)
       model.attributes.each do |attr, val|
         method = :"_#{attr}"
         name = "#{owner_name}.#{method}"
         watch_attribute(name, model, method)
-        if nest && (val.is_a?(Volt::Model) || val.is_a?(Volt::ArrayModel))
-          watch_attributes(name, val, nest: true)
+        if recurse && (val.is_a?(Volt::Model) || val.is_a?(Volt::ArrayModel))
+          watch_attributes(name, val, recurse: true)
         end
       end
     end
