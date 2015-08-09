@@ -2,7 +2,8 @@
 
 ## 0.1.2
 
-- global animate option
+- added global animate option
+- improvements to reactivity
  
 ## 0.1.1
 

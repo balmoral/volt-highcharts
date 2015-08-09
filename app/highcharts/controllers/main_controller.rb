@@ -25,7 +25,7 @@ module Highcharts
     def set_model
       options = attrs.options
       unless options
-        raise ArgumentError, 'no options attribute set for :highcharts component'
+        raise ArgumentError, 'options attribute must be given for :highcharts component'
       end
       # if the options are a Hash then convert to a Volt::Model
       if options.is_a?(Volt::Model)
@@ -40,7 +40,7 @@ module Highcharts
     end
 
     # Create the chart and add it to the page._charts.
-    # page._charts ia an array of Volt::Models with an id and a chart attribute.
+    # page._charts is an array of Volt::Models each having an _id and a _chart (Highcharts::Chart) attribute.
     # Also set page._chart to the newly (last) created Highcharts::Chart.
     # Also set page._char_id to the id of the new (last) chart.
     def create_chart
@@ -58,6 +58,10 @@ module Highcharts
         watch_titles
         watch_series
       end
+    end
+
+    def watch_animation
+      watch_attributes('_animate', self.model)
     end
 
     def watch_titles
@@ -84,7 +88,12 @@ module Highcharts
 
     def process_change(name, value)
       # debug __method__, __LINE__, "#{name} CHANGED"
-      if name =~ /_title/ || name =~ /_subtitle/
+      if name = '_animate'
+        unless value == @animate
+          @animate = value
+          refresh_all_series
+        end
+      elsif name =~ /_title/ || name =~ /_subtitle/
         chart.set_title(_title.to_h, _subtitle.to_h, true) # redraw
       elsif name =~ /_series\[(.*)\]/
         inner_index = name[/\[(.*)\]/][1].to_i

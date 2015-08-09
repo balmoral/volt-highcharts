@@ -8,7 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = Volt::Highcharts::VERSION
   spec.authors       = ["Colin Gunn"]
   spec.email         = ["colgunn@icloud.com"]
-  spec.summary       = %q{Volt component wrapping Highcharts JavaScript library.}
+  spec.summary       = %q{Volt component providing reactive Ruby wrapping of Highcharts + Highstock javascript library.}
+  spec.description   = %q{Volt component providing reactive Ruby wrapping of Highcharts + Highstock javascript library.}
   spec.homepage      = "https://github.com/balmoral/volt-highcharts"
   spec.license       = "MIT"
 
@@ -17,6 +18,7 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
+  spec.required_ruby_version = '>= 2.1'
   spec.add_runtime_dependency 'opal-highcharts', '~> 0.1.0'
 
   # spec.add_development_dependency "volt", "~> 0.9.5.pre3"
