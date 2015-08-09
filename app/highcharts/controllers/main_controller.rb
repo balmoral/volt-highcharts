@@ -36,7 +36,7 @@ module Highcharts
       end
       # set controller's model to options, which captures its methods for self
       self.model = options
-      @animate = model._animate == true
+      @animate = model._animate
     end
 
     # Create the chart and add it to the page._charts.
