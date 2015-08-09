@@ -178,7 +178,7 @@ module Highcharts
         deleted = page._charts.delete_at(i)
         begin
           deleted._chart.destroy # TODO: sometimes this fails - why?
-        rescue Exception, x
+        rescue Exception => x
           debug __method__, __LINE__, "chart._destroy failed: #{x}"
         end
         deleted._chart = nil
