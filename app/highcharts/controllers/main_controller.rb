@@ -55,14 +55,14 @@ module Highcharts
       @watches = []
       @watch_counts = {}
       if reactive
-        watch_animation
+        # watch_animation
         watch_titles
         watch_series
       end
     end
 
     def watch_animation
-      watch_attribute('animate', self.model, :_animate)
+      watch_attribute('_animate', self.model, :_animate)
     end
 
     def watch_titles
@@ -89,7 +89,7 @@ module Highcharts
 
     def process_change(name, value)
       debug __method__, __LINE__, "#{name} CHANGED"
-      if name == 'animate'
+      if name == '_animate'
         unless value == @animate
           @animate = value
           debug __method__, __LINE__, "animate change to #{@animate} : refreshing all series)"
@@ -107,8 +107,6 @@ module Highcharts
           # debug __method__, __LINE__, "#{name} CHANGED => updating all of series[#{inner_index}]"
           chart.series[inner_index].update(inner_series.to_h, true)
         end
-      else
-        # debug __method__, __LINE__, "#{name} CHANGED => updating all of series[#{inner_index}]"
       end
     end
 
