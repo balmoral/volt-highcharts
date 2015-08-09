@@ -184,7 +184,7 @@ module Highcharts
         deleted._chart = nil
       end
       if page._chart_id == _id
-        last = page._charts.last # bug in ReactiveArray
+        last = page._charts.last
         # last = page._charts.empty? ? nil : page._charts.last # bug in ReactiveArray
         page._chart_id = last ? last._id : nil
         page._chart = last ? last._chart : nil
