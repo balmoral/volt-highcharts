@@ -105,7 +105,8 @@ module Highcharts
           chart.series[inner_index].set_data(value.to_a, true, animate)
         else
           # debug __method__, __LINE__, "#{name} CHANGED => updating all of series[#{inner_index}]"
-          chart.series[inner_index].update(inner_series.to_h, true)
+          chart.series[inner_index].update(inner_series.to_h, false)
+          chart.redraw
         end
       end
     end
