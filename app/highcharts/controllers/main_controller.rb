@@ -88,7 +88,7 @@ module Highcharts
 
     def process_change(name, value)
       # debug __method__, __LINE__, "#{name} CHANGED"
-      if name = '_animate'
+      if name == '_animate'
         unless value == @animate
           @animate = value
           debug __method__, __LINE__, "animate change to #{@animate} : refreshing all series)"
