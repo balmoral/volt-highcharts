@@ -88,13 +88,13 @@ module Highcharts
     end
 
     def process_change(name, value)
-      debug __method__, __LINE__, "#{name} CHANGED"
+      # debug __method__, __LINE__, "#{name} CHANGED"
       if name == 'animate'
-        # unless value == @animate
+        unless value == @animate
           @animate = value
           debug __method__, __LINE__, "animate change to #{@animate} : refreshing all series)"
           refresh_all_series
-        # end
+        end
       elsif name =~ /_title/ || name =~ /_subtitle/
         chart.set_title(_title.to_h, _subtitle.to_h, true) # redraw
       elsif name =~ /_series\[(.*)\]/
