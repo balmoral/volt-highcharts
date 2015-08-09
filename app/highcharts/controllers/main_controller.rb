@@ -16,7 +16,7 @@ module Highcharts
 
     def before_index_remove
       stop_watching
-      update_page
+      destroy_chart
       @chart = nil
     end
 
@@ -171,12 +171,16 @@ module Highcharts
       @watches = @watch_counts = nil
     end
 
-    def update_page
+    def destroy_chart
       # clear all references to this chart
       i = page._charts.find_index { |e| e._id == _id }
       if i
         deleted = page._charts.delete_at(i)
-        deleted._chart.destroy
+        begin
+          deleted._chart.destroy # TODO: sometimes this fails - why?
+        rescue Exception, x
+          debug __method__, __LINE__, "chart._destroy failed: #{x}"
+        end
         deleted._chart = nil
       end
       if page._chart_id == _id
