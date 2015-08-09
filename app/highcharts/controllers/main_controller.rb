@@ -55,6 +55,7 @@ module Highcharts
       @watches = []
       @watch_counts = {}
       if reactive
+        watch_animation
         watch_titles
         watch_series
       end
