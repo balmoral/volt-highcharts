@@ -61,7 +61,7 @@ module Highcharts
     end
 
     def watch_animation
-      watch_attributes('_animate', self.model)
+      watch_attribute('animate', self.model, :_animate)
     end
 
     def watch_titles
@@ -87,7 +87,7 @@ module Highcharts
     end
 
     def process_change(name, value)
-      # debug __method__, __LINE__, "#{name} CHANGED"
+      debug __method__, __LINE__, "#{name} CHANGED"
       if name == '_animate'
         # unless value == @animate
           @animate = value
