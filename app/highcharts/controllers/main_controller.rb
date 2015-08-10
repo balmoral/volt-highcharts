@@ -120,8 +120,8 @@ module Highcharts
     def watch_titles
       # watch_attributes('_title', _title)
       # watch_attributes('_subtitle', _subtitle)
-      [->{ _title }, ->{ _subtitle }].each do |computation|
-        bind_deep computation, to: ->{
+      [->{ _title._text }, ->{ _subtitle._text }].each do |computation|
+        bind computation, to: ->{
           debug __method__, __LINE__, "chart.set_title(title=#{_title.to_h}, subtitle=#{_subtitle.to_h})"
           chart.set_title(_title.to_h, _subtitle.to_h, true)
         }
