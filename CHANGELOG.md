@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.1.4
+
+- assets/config/dependencies: https link to code.highcharts.com/highcharts.js, etc 
+ 
 ## 0.1.3
 
 - added global animate option
