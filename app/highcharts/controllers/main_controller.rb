@@ -56,9 +56,12 @@ module Highcharts
       @watch_counts = {}
       if reactive
         # watch_animation
-        bind -> { _animate }, to: -> {
-          debug __method__, __LINE__, 'chart._changed : calling refresh_all_series'
-          refresh_all_series
+        bind -> { _animate }, to: -> { |val|
+          unless val == @animate
+            @animate = val
+            debug __method__, __LINE__, 'chart._changed : calling refresh_all_series'
+            refresh_all_series
+          end
         }
         watch_titles
         watch_series
