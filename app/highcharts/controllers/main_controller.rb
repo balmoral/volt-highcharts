@@ -85,7 +85,7 @@ module Highcharts
 
     def watch_series_other
       _series.each_with_index do |a_series, i|
-        watch ->{ a_series }, tag: i, except: [:_data, :visible] do |tag, val|
+        watch ->{ a_series }, descend: true, tag: i, except: [:_data, :visible] do |tag, val|
           debug __method__, __LINE__, "chart.series[#{tag}].update(#{val.to_h}, true)"
           chart.series[tag].update(val.to_h, true)
         end
