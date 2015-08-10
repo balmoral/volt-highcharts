@@ -63,13 +63,13 @@ module Highcharts
     end
 
     def bind_deep(computation, to: nil)
-      bind computation, to: to, deep: true
+      bind computation, to: to, descend: true
     end
 
-    def bind(computation, to: nil, deep: false)
+    def bind(computation, to: nil, descend: false)
       @bindings ||= []
       @bindings << -> do
-        val = compute(computation, deep)
+        val = compute(computation, descend)
         if @in_start
           debug __method__, __LINE__, "bind @in_start=true not updating #{_title}"
         else
@@ -82,27 +82,31 @@ module Highcharts
       end.watch!
     end
 
-    def compute(computation, deep = false)
+    def compute(computation, descend = false)
       v = computation.call
-      if deep
-        if v.is_a?(Volt::ReactiveArray)
-          compute_array(v, deep)
-        elsif v.is_a?(Volt::Model)
-          compute_model(v, deep)
-        end
-      end
+      descend(v) if descend
       v
     end
 
-    def compute_array(array, deep)
-      array.each do |val|
-        compute(val, deep)
+    def descend(o)
+      if o.is_a?(Volt::Model)
+        monitor_model(o)
+      elsif obj.is_a?(Volt::ReactiveArray)
+        monitor_array(o)
+      elsif obj.is_a?(Volt::ReactiveHash)
+        monitor_array(o)
       end
     end
 
-    def compute_model(model, deep)
-      model.attributes.each do |attr, val|
-        compute(val, deep)
+    def descend_array(array)
+      array.each do |o|
+        descend(o)
+      end
+    end
+
+    def descend_model(model)
+      model.attributes.each_value do |val|
+        descend(val)
       end
     end
 
