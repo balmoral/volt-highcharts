@@ -55,10 +55,29 @@ module Highcharts
       @watches = []
       @watch_counts = {}
       if reactive
-        watch_animation
+        # watch_animation
+        bind -> { chart._animate }, to: -> {
+          debug __method__, __LINE__, 'chart._changed : calling refresh_all_series'
+          refresh_all_series
+        }
         watch_titles
         watch_series
       end
+    end
+
+    def bind(computation, to: nil)
+      @bindings ||= []
+      proc = if to.arity == 0
+        -> do
+          computation.call
+          to.call
+        end.watch!
+      else
+        -> do
+          to.call(computation)
+        end.watch!
+      end
+      @bindings << proc.watch!
     end
 
     def watch_animation
