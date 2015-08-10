@@ -71,7 +71,7 @@ module Highcharts
       @bindings << -> do
         val = compute(computation, descend)
         if @in_start
-          debug __method__, __LINE__, "bind @in_start=true not updating #{_title}"
+          debug __method__, __LINE__, "bind @in_start=true not updating #{_title.to_h}"
         else
           if to.arity == 0
             to.call
