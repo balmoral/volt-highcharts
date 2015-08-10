@@ -62,10 +62,14 @@ module Highcharts
       @in_start = false
     end
 
-    def bind(computation, to: nil)
+    def bind_deep(computation, to: nil)
+      bind computation, to: to, deep: true
+    end
+
+    def bind(computation, to: nil, deep: false)
       @bindings ||= []
       @bindings << -> do
-        val = computation.call
+        val = compute(computation, deep)
         if @in_start
           debug __method__, __LINE__, "bind @in_start=true not updating #{_title}"
         else
@@ -76,6 +80,30 @@ module Highcharts
           end
         end
       end.watch!
+    end
+
+    def compute(computation, deep = false)
+      v = computation.call
+      if deep
+        if v.is_a?(Volt::ReactiveArray)
+          compute_array(v, deep)
+        elsif v.is_a?(Volt::Model)
+          compute_model(v, deep)
+        end
+      end
+      v
+    end
+
+    def compute_array(array, deep)
+      array.each do |val|
+        compute(val, deep)
+      end
+    end
+
+    def compute_model(model, deep)
+      model.attributes.each do |attr, val|
+        compute(val, deep)
+      end
     end
 
     def watch_animation
@@ -89,7 +117,7 @@ module Highcharts
       # watch_attributes('_title', _title)
       # watch_attributes('_subtitle', _subtitle)
       [->{ _title }, ->{ _subtitle }].each do |computation|
-        bind computation, to: ->{
+        bind_deep computation, to: ->{
           debug __method__, __LINE__, "chart.set_title(title=#{_title.to_h}, subtitle=#{_subtitle.to_h})"
           chart.set_title(_title.to_h, _subtitle.to_h, true)
         }
