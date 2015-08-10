@@ -150,6 +150,7 @@ module Highcharts
       # debug __method__, __LINE__, "setting watches for _series"
       _series.each_with_index do |a_series, i|
         bind ->{ a_series }, tag: i, to: ->(tag, val) do
+         debug __method__, __LINE__, "chart.series[#{tag}].set_data(#{val.to_a}, true, #{_animate})"
           chart.series[tag].set_data(val.to_a, true, _animate)
         end
       end
