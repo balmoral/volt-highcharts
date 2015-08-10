@@ -53,7 +53,6 @@ module Highcharts
     def start_watching
       @in_start = true
       @watches = []
-      @watch_counts = {}
       if reactive
         watch_animation
         watch_titles
@@ -62,115 +61,59 @@ module Highcharts
       @in_start = false
     end
 
-    def bind_deep(computation, to: nil)
-      bind computation, to: to, descend: true
-    end
-
-    def bind(computation, to: nil, descend: false, tag: nil)
-      @bindings ||= []
-      @bindings << -> do
-        val = compute(computation, descend)
-        if @in_start
-          debug __method__, __LINE__, "bind @in_start=true not updating #{_title.to_h}"
-        else
-          if to.arity == 0
-            to.call
-          elsif to.arity == 1
-            to.call tag ? tag : val
-          elsif to.arity == 2
-            to.call tag, val
-          end
-        end
-      end.watch!
-    end
-
-    def compute(computation, descend = false)
-      v = computation.call
-      descend(v) if descend
-      v
-    end
-
-    def descend(o)
-      if o.is_a?(Volt::Model)
-        descend_model(o)
-      elsif o.is_a?(Volt::ReactiveArray)
-        descend_array(o)
-      elsif o.is_a?(Volt::ReactiveHash)
-        descend_hash(o)
-      end
-    end
-
-    def descend_array(array)
-      # this way to force dependency
-      array.size.times do |i|
-        descend(array[i])
-      end
-    end
-
-    def descend_hash(hash)
-      hash.each_key do |k|
-        # this way to force dependency
-        descend(hash[k])
-      end
-    end
-
-    def descend_model(model)
-      model.attributes.each_key do |attr|
-        # this way to force dependency
-        descend(model.send(:"_#{attr}"))
-      end
-    end
-
     def watch_animation
-      bind ->{ _animate }, to: ->{
-        debug __method__, __LINE__, "_animate=#{_animate} : refresh_all_series"
+      watch(->{ _animate }) do
+        # debug __method__, __LINE__, "_animate=#{_animate} : refresh_all_series"
         refresh_all_series
-      }
+      end
     end
 
     def watch_titles
       [->{ _title }, ->{ _subtitle }].each do |computation|
-        bind_deep computation, to: ->{ chart.set_title(_title.to_h, _subtitle.to_h, true) }
+        watch(computation, descend: true) do
+          chart.set_title(_title.to_h, _subtitle.to_h, true)
+        end
       end
     end
 
     def watch_series
       # watch_series_size
-      watch_each_series
+      watch_series_data
+      watch_series_visibility
+      watch_series_other
     end
 
-    def watch_series_size
-      watch_attributes("_series", _series, recurse: false) do |key, value|
-        debug __method__, __LINE__, "_series.#{key} changed"
-        refresh_all_series
+    def watch_series_other
+      _series.each_with_index do |a_series, i|
+        watch ->{ a_series }, tag: i, except: [:_data, :visible] do |tag, val|
+          debug __method__, __LINE__, "chart.series[#{tag}].update(#{val.to_h}, true)"
+          chart.series[tag].update(val.to_h, true)
+        end
       end
     end
 
-    def watch_each_series
-      # debug __method__, __LINE__, "setting watches for _series"
+    def watch_series_data
       _series.each_with_index do |a_series, i|
-        bind ->{ a_series._data }, tag: i, to: ->(tag, val) do
+        watch ->{ a_series._data }, tag: i do |tag, val|
           debug __method__, __LINE__, "chart.series[#{tag}].set_data(#{val.to_a}, true, #{_animate})"
           chart.series[tag].set_data(val.to_a, true, _animate)
         end
       end
     end
 
-    def process_change(name, value)
-      # debug __method__, __LINE__, "#{name} CHANGED"
-      if name =~ /_title/ || name =~ /_subtitle/
-        chart.set_title(_title.to_h, _subtitle.to_h, true) # redraw
-      elsif name =~ /_series\[(.*)\]/
-        inner_index = name[/\[(.*)\]/][1].to_i
-        inner_series = _series[inner_index]
-        if name.split('.').last == '_data'
-          # debug __method__, __LINE__, "chart.series[#{inner_index}].set_data(#{value.to_a})"
-          chart.series[inner_index].set_data(value.to_a, true, animate)
-        else
-          # debug __method__, __LINE__, "#{name} CHANGED => updating all of series[#{inner_index}]"
-          chart.series[inner_index].update(inner_series.to_h, false)
-          chart.redraw
+    def watch_series_visibility
+      _series.each_with_index do |a_series, i|
+        watch ->{ a_series._visible }, tag: i do |tag, val|
+          debug __method__, __LINE__, "chart.series[#{tag}].set_visible(#{val}, true)"
+          chart.series[tag].set_data(val.to_a, true)
         end
+      end
+    end
+
+    def watch_series_size
+      watch_attributes("_series", _series, recurse: false) do |key, value|
+        # debug __method__, __LINE__, "_series.#{key} changed"
+        refresh_all_series
       end
     end
 
@@ -190,48 +133,9 @@ module Highcharts
       start_watching
     end
 
-    # Create watches for attributes of a model.
-    # TODO: better or built-in way ??
-    def watch_attributes(name, model, recurse: true)
-      if model.is_a?(Volt::ArrayModel)
-        watch_array_model(name, model, recurse: recurse)
-      elsif model.is_a?(Volt::Model)
-        watch_model(name, model, recurse: recurse)
-      end
-    end
-
-    def watch_array_model(name, model, recurse: true)
-      watch_attribute("#{name}.size", model, :size)
-      if recurse
-        model.each_with_index do |e,i|
-          if e.is_a?(Volt::Model) || e.is_a?(Volt::ArrayModel)
-            watch_attributes("#{name}[#{i}]", e, recurse: recurse)
-          end
-        end
-      end
-    end
-
-    def watch_model(owner_name, model, recurse: true)
-      model.attributes.each do |attr, val|
-        method = :"_#{attr}"
-        name = "#{owner_name}.#{method}"
-        watch_attribute(name, model, method)
-        if recurse && (val.is_a?(Volt::Model) || val.is_a?(Volt::ArrayModel))
-          watch_attributes(name, val, recurse: true)
-        end
-      end
-    end
-
-    def watch_attribute(name, model, method)
-      watches << -> do
-        # debug 'watch!', __LINE__, "#{name} CHANGED"
-        process_change(name, model.send(method))
-      end.watch!
-    end
-
     def stop_watching
       @watches.each {|w| w.stop}
-      @watches = @watch_counts = nil
+      @watches = nil
     end
 
     def destroy_chart
@@ -251,6 +155,64 @@ module Highcharts
         # last = page._charts.empty? ? nil : page._charts.last # bug in ReactiveArray
         page._chart_id = last ? last._id : nil
         page._chart = last ? last._chart : nil
+      end
+    end
+
+    def watch(computation, descend: false, tag: nil, except: nil, &block)
+      @watches ||= []
+      @watches << -> do
+        val = compute(computation, descend, except)
+        if @in_start
+          debug __method__, __LINE__, "watch @in_start=true not updating #{_title.to_h}"
+        else
+          if block.arity == 0
+            block.call
+          elsif block.arity == 1
+            block.call(tag ? tag : val)
+          elsif to.arity == 2
+            block.call(tag, val)
+          end
+        end
+      end.watch!
+    end
+
+    def compute(computation, descend, except)
+      v = computation.call
+      descend(v, except) if descend
+      v
+    end
+
+    def descend(o, except)
+      if o.is_a?(Volt::Model)
+        descend_model(o, except)
+      elsif o.is_a?(Volt::ReactiveArray)
+        descend_array(o, except)
+      elsif o.is_a?(Volt::ReactiveHash)
+        descend_hash(o, except)
+      end
+    end
+
+    def descend_array(array, except)
+      # this way to force dependency
+      array.size.times do |i|
+        descend(array[i], except)
+      end
+    end
+
+    def descend_hash(hash, except)
+      hash.each_key do |k|
+        # this way to force dependency
+        descend(hash[k], except)
+      end
+    end
+
+    def descend_model(model, except)
+      model.attributes.each_key do |attr|
+        # this way to force dependency
+        _attr = :"_#{attr}"
+        unless except && except.include?(_attr)
+          descend(model.send(_attr), except)
+        end
       end
     end
 
