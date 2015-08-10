@@ -1,10 +1,14 @@
 # Change Log
 
-## 0.1.2
+## 0.1.3
 
 - added global animate option
-- improvements to reactivity
+- improvements to reactivity logic
  
+## 0.1.2
+
+- various tweaks
+
 ## 0.1.1
 
 - now uses opal-highcharts gem  
