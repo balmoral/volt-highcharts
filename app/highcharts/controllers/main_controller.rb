@@ -169,7 +169,7 @@ module Highcharts
             block.call
           elsif block.arity == 1
             block.call(tag ? tag : val)
-          elsif to.arity == 2
+          elsif block.arity == 2
             block.call(tag, val)
           end
         end
