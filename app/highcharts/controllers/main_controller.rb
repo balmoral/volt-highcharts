@@ -94,19 +94,28 @@ module Highcharts
       elsif o.is_a?(Volt::ReactiveArray)
         descend_array(o)
       elsif o.is_a?(Volt::ReactiveHash)
-        descend_array(o)
+        descend_hash(o)
       end
     end
 
     def descend_array(array)
-      array.each do |o|
-        descend(o)
+      # this way to force dependency
+      array.size.times do |i|
+        descend(array[i])
+      end
+    end
+
+    def descend_hash(hash)
+      hash.each_key do |k|
+        # this way to force dependency
+        descend(hash[k])
       end
     end
 
     def descend_model(model)
-      model.attributes.each_value do |val|
-        descend(val)
+      model.attributes.each_key do |attr|
+        # this way to force dependency
+        descend(model.send(:"_#{attr}"))
       end
     end
 
@@ -120,8 +129,8 @@ module Highcharts
     def watch_titles
       # watch_attributes('_title', _title)
       # watch_attributes('_subtitle', _subtitle)
-      [->{ _title._text }, ->{ _subtitle._text }].each do |computation|
-        bind computation, to: ->{
+      [->{ _title }, ->{ _subtitle }].each do |computation|
+        bind_deep computation, to: ->{
           debug __method__, __LINE__, "chart.set_title(title=#{_title.to_h}, subtitle=#{_subtitle.to_h})"
           chart.set_title(_title.to_h, _subtitle.to_h, true)
         }
