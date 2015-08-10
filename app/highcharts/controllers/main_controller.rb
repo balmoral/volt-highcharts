@@ -91,9 +91,9 @@ module Highcharts
     def descend(o)
       if o.is_a?(Volt::Model)
         descend_model(o)
-      elsif obj.is_a?(Volt::ReactiveArray)
+      elsif o.is_a?(Volt::ReactiveArray)
         descend_array(o)
-      elsif obj.is_a?(Volt::ReactiveHash)
+      elsif o.is_a?(Volt::ReactiveHash)
         descend_array(o)
       end
     end
