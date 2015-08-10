@@ -62,21 +62,20 @@ module Highcharts
       @in_start = false
     end
 
-    def bind(proc_or_procs, to: nil)
+    def bind(computation, to: nil)
       @bindings ||= []
-      procs = proc_or_procs.is_a?( Enumerable) ? proc_or_procs : [proc_or_procs]
-      procs.each do |proc|
-        @bindings << -> do
-          val = proc.call
-          unless @in_start
-            if to.arity == 0
-              to.call
-            else
-              to.call val
-            end
+      @bindings << -> do
+        val = computation.call
+        if @in_start
+          debug __method__, __LINE__, "bind @in_start=true not updating"
+        else
+          if to.arity == 0
+            to.call
+          else
+            to.call val
           end
-        end.watch!
-      end
+        end
+      end.watch!
     end
 
     def watch_animation
@@ -91,7 +90,7 @@ module Highcharts
       # watch_attributes('_subtitle', _subtitle)
       [->{ _title }, ->{ _subtitle }].each do |computation|
         bind computation, to: ->{
-          debug __method__, __LINE__, "chrt.set_title(title=#{_title.to_h}, subtitle=#{_subtitle.to_h})"
+          debug __method__, __LINE__, "chart.set_title(title=#{_title.to_h}, subtitle=#{_subtitle.to_h})"
           chart.set_title(_title.to_h, _subtitle.to_h, true)
         }
       end
