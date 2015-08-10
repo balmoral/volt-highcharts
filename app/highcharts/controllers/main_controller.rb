@@ -36,7 +36,6 @@ module Highcharts
       end
       # set controller's model to options, which captures its methods for self
       self.model = options
-      @animate = model._animate
     end
 
     # Create the chart and add it to the page._charts.
@@ -81,14 +80,20 @@ module Highcharts
     end
 
     def watch_animation
-      bind ->{ _animate }, to: ->{refresh_all_series}
+      bind ->{ _animate }, to: ->{
+        debug __method__, __LINE__, "_animate=#{_animate} : refresh_all_series"
+        refresh_all_series
+      }
     end
 
     def watch_titles
       # watch_attributes('_title', _title)
       # watch_attributes('_subtitle', _subtitle)
-      [->{_title}, ->{_subtitle}].each do |computation|
-        bind computation, to: ->{ chart.set_title(_title.to_h, _subtitle.to_h, true) }
+      [->{ _title }, ->{ _subtitle }].each do |computation|
+        bind computation, to: ->{
+          debug __method__, __LINE__, "chrt.set_title(title=#{_title.to_h}, subtitle=#{_subtitle.to_h})"
+          chart.set_title(_title.to_h, _subtitle.to_h, true)
+        }
       end
     end
 
@@ -111,13 +116,7 @@ module Highcharts
 
     def process_change(name, value)
       # debug __method__, __LINE__, "#{name} CHANGED"
-      if name == '_animate'
-        unless value == @animate
-          @animate = value
-          # debug __method__, __LINE__, "animate change to #{@animate} : refreshing all series)"
-          refresh_all_series
-        end
-      elsif name =~ /_title/ || name =~ /_subtitle/
+      if name =~ /_title/ || name =~ /_subtitle/
         chart.set_title(_title.to_h, _subtitle.to_h, true) # redraw
       elsif name =~ /_series\[(.*)\]/
         inner_index = name[/\[(.*)\]/][1].to_i
