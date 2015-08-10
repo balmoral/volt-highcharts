@@ -56,41 +56,40 @@ module Highcharts
       @watches = []
       @watch_counts = {}
       if reactive
-        # watch_animation
-        bind -> { _animate }, to: ->(val) do
-          unless val == @animate
-            @animate = val
-            debug __method__, __LINE__, 'chart._changed : calling refresh_all_series'
-            refresh_all_series
-          end
-        end
+        watch_animation
         watch_titles
         watch_series
       end
       @in_start = false
     end
 
-    def bind(proc, to: nil)
+    def bind(proc_or_procs, to: nil)
       @bindings ||= []
-      @bindings << -> do
-        val = proc.call
-        unless @in_start
-          if to.arity == 0
-            to.call
-          else
-            to.call val
+      procs = proc_or_procs.is_a?( Enumerable) ? proc_or_procs : [proc_or_procs]
+      procs.each do |proc|
+        @bindings << -> do
+          val = proc.call
+          unless @in_start
+            if to.arity == 0
+              to.call
+            else
+              to.call val
+            end
           end
-        end
-      end.watch!
+        end.watch!
+      end
     end
 
     def watch_animation
-      watch_attribute('_animate', self.model, :_animate)
+      bind ->{ _animate }, to: ->{refresh_all_series}
     end
 
     def watch_titles
-      watch_attributes('_title', _title)
-      watch_attributes('_subtitle', _subtitle)
+      # watch_attributes('_title', _title)
+      # watch_attributes('_subtitle', _subtitle)
+      [->{_title}, ->{_subtitle}].each do |computation|
+        bind computation, to: ->{ chart.set_title(_title.to_h, _subtitle.to_h, true) }
+      end
     end
 
     def watch_series
