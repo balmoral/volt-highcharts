@@ -20,7 +20,7 @@ module Highcharts
       @chart = nil
     end
 
-    private
+    protected
 
     def set_model
       options = attrs.options
@@ -144,7 +144,7 @@ module Highcharts
       if i
         deleted = page._charts.delete_at(i)
         begin
-          deleted._chart.destroy # TODO: sometimes this fails - why?
+          deleted._chart.destroy # TODO: sometimes this fails - seems ok since volt-0.9.5.pre4 after 2015-08-10
         rescue Exception => x
           debug __method__, __LINE__, "chart._destroy failed: #{x}"
         end
@@ -162,9 +162,7 @@ module Highcharts
       @watches ||= []
       @watches << -> do
         val = compute(computation, descend, except)
-        if @in_start
-          debug __method__, __LINE__, "watch @in_start=true not updating #{_title.to_h}"
-        else
+        unless @in_start
           if block.arity == 0
             block.call
           elsif block.arity == 1
