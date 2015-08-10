@@ -6,7 +6,7 @@ require 'opal-highcharts'
 module Highcharts
   class MainController < Volt::ModelController
 
-    attr_reader :chart, :watches, :watch_counts, :reactive, :animate
+    attr_reader :chart, :watches, :watch_counts, :reactive
 
     def index_ready
       set_model
@@ -66,7 +66,7 @@ module Highcharts
       bind computation, to: to, descend: true
     end
 
-    def bind(computation, to: nil, descend: false)
+    def bind(computation, to: nil, descend: false, tag: nil)
       @bindings ||= []
       @bindings << -> do
         val = compute(computation, descend)
@@ -75,8 +75,10 @@ module Highcharts
         else
           if to.arity == 0
             to.call
-          else
-            to.call val
+          elsif to.arity == 1
+            to.call tag ? tag : val
+          elsif to.arity == 2
+            to.call tag, val
           end
         end
       end.watch!
@@ -127,13 +129,8 @@ module Highcharts
     end
 
     def watch_titles
-      # watch_attributes('_title', _title)
-      # watch_attributes('_subtitle', _subtitle)
       [->{ _title }, ->{ _subtitle }].each do |computation|
-        bind_deep computation, to: ->{
-          debug __method__, __LINE__, "chart.set_title(title=#{_title.to_h}, subtitle=#{_subtitle.to_h})"
-          chart.set_title(_title.to_h, _subtitle.to_h, true)
-        }
+        bind_deep computation, to: ->{ chart.set_title(_title.to_h, _subtitle.to_h, true) }
       end
     end
 
@@ -151,7 +148,11 @@ module Highcharts
 
     def watch_each_series
       # debug __method__, __LINE__, "setting watches for _series"
-      watch_attributes('_series', _series)
+      _series.each_with_index do |a_series, i|
+        bind ->{ a_series }, tag: i, to: ->(tag, val) do
+          chart.series[tag].set_data(val.to_a, true, _animate)
+        end
+      end
     end
 
     def process_change(name, value)
