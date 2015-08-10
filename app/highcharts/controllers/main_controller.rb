@@ -52,6 +52,7 @@ module Highcharts
 
     # To be reactive we must watch for model changes
     def start_watching
+      @in_start = true
       @watches = []
       @watch_counts = {}
       if reactive
@@ -66,21 +67,21 @@ module Highcharts
         watch_titles
         watch_series
       end
+      @in_start = false
     end
 
-    def bind(computation, to: nil)
+    def bind(proc, to: nil)
       @bindings ||= []
-      proc = if to.arity == 0
-        -> do
-          computation.call
-          to.call
-        end.watch!
-      else
-        -> do
-          to.call(computation)
-        end.watch!
-      end
-      @bindings << proc.watch!
+      @bindings << -> do
+        val = proc.call
+        unless @in_start
+          if to.arity == 0
+            to.call
+          else
+            to.call val
+          end
+        end
+      end.watch!
     end
 
     def watch_animation
