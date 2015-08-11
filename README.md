@@ -9,10 +9,10 @@ It depends on opal-highcharts, a gem which wraps most Highcharts and Highstock f
 Highcharts is free for non-commercial use.
 
 See
-- http://www.highcharts.com
-- http://github.com/balmoral/volt-highcharts-app
-- http://github.com/balmoral/volt-highcharts
-- http://github.com/balmoral/opal-highcharts
+- https://www.highcharts.com
+- https://github.com/balmoral/volt-highcharts-app
+- https://github.com/balmoral/volt-highcharts
+- https://github.com/balmoral/opal-highcharts
 - https://rubygems.org/gems/volt-highcharts
 - https://rubygems.org/gems/opal-highcharts
 
