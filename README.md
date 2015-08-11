@@ -141,6 +141,8 @@ However, as reactivity support is improved, there should be less need for direct
  
 An example application can be found at https://github.com/balmoral/volt-highcharts-app.
 
+See it running at https://volt-highcharts-app.herokuapp.com/.
+
 ## To do
 
 1. chart option/configuration checks
