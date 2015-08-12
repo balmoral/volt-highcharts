@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.1.5
+
+- README.md edits 
+
 ## 0.1.4
 
 - assets/config/dependencies: https link to code.highcharts.com/highcharts.js, etc 

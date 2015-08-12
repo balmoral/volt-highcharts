@@ -43,7 +43,7 @@ Next add volt-highcharts to the dependencies.rb file:
 Pass a Ruby hash containing chart options in the appropriate view html file:
 
 ```html
-<:highcharts chart="{{ chart_options }}" />
+<:highcharts options="{{ chart_options }}" />
 ```
 
 where `chart_options` is a Volt::Model or Hash provided by your controller or model. 
