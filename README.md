@@ -108,7 +108,7 @@ and your views .html file
 <:Title>
   volt-highcharts
 <:Body>
-  <span id="fruit_chart" >
+  <span id="fruit" >
     <:highcharts options="{{ chart_options }}" />
   </span>
 ```
