@@ -2,6 +2,7 @@ if RUBY_PLATFORM == 'opal'
 
 require 'native'
 require 'opal-highcharts'
+require 'volt-reactor'
 
 module Highcharts
   class MainController < Volt::ModelController
