@@ -64,7 +64,7 @@ module Highcharts
 
     def bind_animation
       bind(->{ _animate }, condition: ->{ !@in_start} ) do
-        debug __method__, __LINE__, "_animate=#{_animate} : refresh_all_series"
+        # debug __method__, __LINE__, "_animate=#{_animate} : refresh_all_series"
         refresh_all_series
       end
     end
@@ -72,6 +72,7 @@ module Highcharts
     def bind_titles
       [->{ _title }, ->{ _subtitle }].each do |computation|
         bind(computation, condition: ->{ !@in_start}, descend: true) do
+          # debug __method__, __LINE__, "_title #{_title} or _subtitle #{_subtitle} changed"
           chart.set_title(_title.to_h, _subtitle.to_h, true)
         end
       end
@@ -87,7 +88,7 @@ module Highcharts
     def bind_series_other
       _series.each_with_index do |a_series, i|
         bind(->{ a_series }, condition: ->{ !@in_start}, descend: true, tag: i, except: [:_data, :visible]) do |tag, val|
-          debug __method__, __LINE__, "chart.series[#{tag}].update(#{val.to_h}, true)"
+          # debug __method__, __LINE__, "chart.series[#{tag}].update(#{val.to_h}, true)"
           chart.series[tag].update(val.to_h, true)
         end
       end
@@ -96,7 +97,7 @@ module Highcharts
     def bind_series_data
       _series.each_with_index do |a_series, i|
         bind(->{ a_series._data }, condition: ->{ !@in_start}, tag: i) do |tag, val|
-          debug __method__, __LINE__, "chart.series[#{tag}].set_data(#{val.to_a}, true, #{_animate})"
+          # debug __method__, __LINE__, "chart.series[#{tag}].set_data(#{val.to_a}, true, #{_animate})"
           chart.series[tag].set_data(val.to_a, true, _animate)
         end
       end
