@@ -7,7 +7,7 @@ if RUBY_PLATFORM == 'opal'
 
 module Highcharts
   class MainController < Volt::ModelController
-    include Reactor
+    include Volt::Reactor
 
     attr_reader :chart, :watches, :watch_counts, :reactive
 
