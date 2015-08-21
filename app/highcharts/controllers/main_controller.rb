@@ -69,7 +69,7 @@ module Highcharts
 
     def bind_titles
       [->{ _title }, ->{ _subtitle }].each do |computation|
-        bind(computation, descend: true) do
+        bind(computation, inspect: true) do
           # debug __method__, __LINE__, "_title #{_title} or _subtitle #{_subtitle} changed"
           chart.set_title(_title.to_h, _subtitle.to_h, true) unless @in_refresh_all
         end
@@ -85,7 +85,7 @@ module Highcharts
 
     def bind_series_other
       _series.each_with_index do |a_series, i|
-        bind(->{ a_series }, descend: true, tag: i, except: [:_data, :visible]) do |tag, val|
+        bind(->{ a_series }, inspect: true, tag: i, except: [:_data, :visible]) do |tag, val|
           # debug __method__, __LINE__, "chart.series[#{tag}].update(#{val.to_h}, true)"
           chart.series[tag].update(val.to_h, true) unless @in_refresh_all
         end
