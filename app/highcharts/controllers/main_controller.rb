@@ -122,8 +122,9 @@ module Highcharts
     # 2. add all series in model to chart with no redraw
     # 3. redraw chart
     def refresh_all_series
-      unless @in_refresh_all
-        @in_refresh_all = true
+      # unless @in_refresh_all
+      #  @in_refresh_all = true
+        pause_reactor
         until chart.series.empty? do
           chart.series.last.remove(false)
         end
@@ -131,8 +132,9 @@ module Highcharts
           chart.add_series(a_series.to_h, false)
         end
         chart.redraw
-        @in_refresh_all = false
-      end
+        # @in_refresh_all = false
+        start_reactor
+      # end
     end
 
     def stop_reactor
