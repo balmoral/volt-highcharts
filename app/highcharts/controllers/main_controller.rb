@@ -96,7 +96,7 @@ module Highcharts
       _series.each_with_index do |a_series, i|
         bind(->{ a_series._data }, tag: i) do |tag, val|
           # debug __method__, __LINE__, "chart.series[#{tag}].set_data(#{val.to_a}, true, #{_animate})"
-          chart.series[tag].set_data(val.to_a, true, _animate) unless @in_refresh_all
+          chart.series[i].set_data(val.to_a, true, _animate) unless @in_refresh_all
         end
       end
     end
