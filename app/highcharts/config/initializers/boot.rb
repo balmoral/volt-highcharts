@@ -11,5 +11,4 @@
 
 if RUBY_PLATFORM == 'opal'
   require 'native'
-  require 'reactor'
 end
