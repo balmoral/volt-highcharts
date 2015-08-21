@@ -8,16 +8,16 @@ module Highcharts
   class MainController < Volt::ModelController
     include Volt::Reactor
 
-    attr_reader :chart, :watches, :watch_counts, :reactive
+    attr_reader :chart, :bind_counts, :reactive
 
     def index_ready
       set_model
       create_chart
-      start_watching
+      start_reactor
     end
 
     def before_index_remove
-      stop_watching
+      stop_reactor
       destroy_chart
       @chart = nil
     end
@@ -51,26 +51,23 @@ module Highcharts
       page._chart_id = _id
     end
 
-    # To be reactive we must watch for model changes
-    def start_watching
-      @in_start = true
-      @watches = []
+    def start_reaction
       if reactive
-        watch_animation
-        watch_titles
-        watch_series
+        bind_animation
+        bind_titles
+        bind_series
       end
       @in_start = false
     end
 
-    def watch_animation
-      watch(->{ _animate }) do
+    def bind_animation
+      bind(->{ _animate }) do
         # debug __method__, __LINE__, "_animate=#{_animate} : refresh_all_series"
         refresh_all_series
       end
     end
 
-    def watch_titles
+    def bind_titles
       [->{ _title }, ->{ _subtitle }].each do |computation|
         bind(computation, condition: ->{ !@in_start}, descend: true) do
           chart.set_title(_title.to_h, _subtitle.to_h, true)
@@ -78,14 +75,14 @@ module Highcharts
       end
     end
 
-    def watch_series
-      # watch_series_size
-      watch_series_data
-      watch_series_visibility
-      watch_series_other
+    def bind_series
+      # bind_series_size
+      bind_series_data
+      bind_series_visibility
+      bind_series_other
     end
 
-    def watch_series_other
+    def bind_series_other
       _series.each_with_index do |a_series, i|
         bind(->{ a_series }, descend: true, tag: i, except: [:_data, :visible]) do |tag, val|
           # debug __method__, __LINE__, "chart.series[#{tag}].update(#{val.to_h}, true)"
@@ -94,7 +91,7 @@ module Highcharts
       end
     end
 
-    def watch_series_data
+    def bind_series_data
       _series.each_with_index do |a_series, i|
         bind(->{ a_series._data }, tag: i) do |tag, val|
           # debug __method__, __LINE__, "chart.series[#{tag}].set_data(#{val.to_a}, true, #{_animate})"
@@ -103,7 +100,7 @@ module Highcharts
       end
     end
 
-    def watch_series_visibility
+    def bind_series_visibility
       _series.each_with_index do |a_series, i|
         bind(->{ a_series._visible }, tag: i) do |tag, val|
           # debug __method__, __LINE__, "chart.series[#{tag}].set_visible(#{val}, true)"
@@ -112,8 +109,8 @@ module Highcharts
       end
     end
 
-    def watch_series_size
-      watch_attributes("_series", _series, recurse: false) do |key, value|
+    def bind_series_size
+      bind_attributes("_series", _series, recurse: false) do |key, value|
         # debug __method__, __LINE__, "_series.#{key} changed"
         refresh_all_series
       end
@@ -124,7 +121,7 @@ module Highcharts
     # 2. add all series in model to chart with no redraw
     # 3. redraw chart
     def refresh_all_series
-      stop_watching
+      stop_reactor
       until chart.series.empty? do
         chart.series.last.remove(false)
       end
@@ -132,12 +129,11 @@ module Highcharts
         chart.add_series(a_series.to_h, false)
       end
       chart.redraw
-      start_watching
+      start_reactor
     end
 
-    def stop_watching
-      @watches.each {|w| w.stop}
-      @watches = nil
+    def stop_reactor
+      super
     end
 
     def destroy_chart
