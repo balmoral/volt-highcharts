@@ -85,8 +85,8 @@ module Highcharts
 
     def bind_series_other
       _series.each_with_index do |a_series, i|
-        bind(->{ a_series }, inner: true, tag: i, except: [:_data, :visible]) do |tag, val|
-          # debug __method__, __LINE__, "chart.series[#{tag}].update(#{val.to_h}, true)"
+        bind(->{ a_series }, inner: true, except: [:_data, :visible]) do |val|
+          # debug __method__, __LINE__, "chart.series[#{i}].update(#{val.to_h}, true)"
           chart.series[i].update(val.to_h, true) unless @in_refresh_all
         end
       end
@@ -94,8 +94,8 @@ module Highcharts
 
     def bind_series_data
       _series.each_with_index do |a_series, i|
-        bind(->{ a_series._data }, tag: i) do |tag, val|
-          # debug __method__, __LINE__, "chart.series[#{tag}].set_data(#{val.to_a}, true, #{_animate})"
+        bind(->{ a_series._data }) do |val|
+          # debug __method__, __LINE__, "chart.series[#{i}].set_data(#{val.to_a}, true, #{_animate})"
           chart.series[i].set_data(val.to_a, true, _animate) unless @in_refresh_all
         end
       end
@@ -103,9 +103,9 @@ module Highcharts
 
     def bind_series_visibility
       _series.each_with_index do |a_series, i|
-        bind(->{ a_series._visible }, tag: i) do |tag, val|
-          # debug __method__, __LINE__, "chart.series[#{tag}].set_visible(#{val}, true)"
-          chart.series[tag].set_data(val.to_a, true) unless @in_refresh_all
+        bind(->{ a_series._visible }) do |val|
+          # debug __method__, __LINE__, "chart.series[#{i}].set_visible(#{val}, true)"
+          chart.series[i].set_data(val.to_a, true) unless @in_refresh_all
         end
       end
     end
