@@ -53,6 +53,7 @@ module Highcharts
 
     def start_reactor
       if reactive
+        puts "starting reactor"
         bind_animation
         bind_titles
         bind_series
@@ -62,7 +63,7 @@ module Highcharts
 
     def bind_animation
       bind(->{ _animate }) do
-        # debug __method__, __LINE__, "_animate=#{_animate} : refresh_all_series"
+        debug __method__, __LINE__, "_animate=#{_animate} : refresh_all_series"
         refresh_all_series
       end
     end
@@ -85,7 +86,7 @@ module Highcharts
     def bind_series_other
       _series.each_with_index do |a_series, i|
         bind(->{ a_series }, descend: true, tag: i, except: [:_data, :visible]) do |tag, val|
-          # debug __method__, __LINE__, "chart.series[#{tag}].update(#{val.to_h}, true)"
+          debug __method__, __LINE__, "chart.series[#{tag}].update(#{val.to_h}, true)"
           chart.series[tag].update(val.to_h, true)
         end
       end
@@ -94,7 +95,7 @@ module Highcharts
     def bind_series_data
       _series.each_with_index do |a_series, i|
         bind(->{ a_series._data }, tag: i) do |tag, val|
-          # debug __method__, __LINE__, "chart.series[#{tag}].set_data(#{val.to_a}, true, #{_animate})"
+          debug __method__, __LINE__, "chart.series[#{tag}].set_data(#{val.to_a}, true, #{_animate})"
           chart.series[tag].set_data(val.to_a, true, _animate)
         end
       end
@@ -103,7 +104,7 @@ module Highcharts
     def bind_series_visibility
       _series.each_with_index do |a_series, i|
         bind(->{ a_series._visible }, tag: i) do |tag, val|
-          # debug __method__, __LINE__, "chart.series[#{tag}].set_visible(#{val}, true)"
+          debug __method__, __LINE__, "chart.series[#{tag}].set_visible(#{val}, true)"
           chart.series[tag].set_data(val.to_a, true)
         end
       end
@@ -111,7 +112,7 @@ module Highcharts
 
     def bind_series_size
       bind_attributes("_series", _series, recurse: false) do |key, value|
-        # debug __method__, __LINE__, "_series.#{key} changed"
+        debug __method__, __LINE__, "_series.#{key} changed"
         refresh_all_series
       end
     end
