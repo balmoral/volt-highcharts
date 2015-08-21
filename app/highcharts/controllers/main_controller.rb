@@ -72,9 +72,12 @@ module Highcharts
 
     def watch_titles
       [->{ _title }, ->{ _subtitle }].each do |computation|
-        watch(computation, descend: true) do
+        bind(computation, condition: ->{ !@in_start}, descend: true) do
           chart.set_title(_title.to_h, _subtitle.to_h, true)
         end
+        # watch(computation, descend: true) do
+        #  chart.set_title(_title.to_h, _subtitle.to_h, true)
+        # end
       end
     end
 
@@ -161,7 +164,7 @@ module Highcharts
     end
 
     def watch(computation, descend: false, tag: nil, except: nil, &block)
-      use_reactor = true
+      use_reactor = false
       if use_reactor
         unless block
           raise ArgumentError, 'no block given for watch'
