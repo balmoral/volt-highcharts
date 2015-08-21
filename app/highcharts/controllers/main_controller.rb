@@ -105,7 +105,7 @@ module Highcharts
     def bind_series_visibility
       _series.each_with_index do |a_series, i|
         bind(->{ a_series._visible }, condition: ->{ !@in_start}, tag: i) do |tag, val|
-          debug __method__, __LINE__, "chart.series[#{tag}].set_visible(#{val}, true)"
+          # debug __method__, __LINE__, "chart.series[#{tag}].set_visible(#{val}, true)"
           chart.series[tag].set_data(val.to_a, true)
         end
       end
