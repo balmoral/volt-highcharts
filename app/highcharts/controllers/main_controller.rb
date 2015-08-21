@@ -51,7 +51,7 @@ module Highcharts
       page._chart_id = _id
     end
 
-    def start_reaction
+    def start_reactor
       if reactive
         bind_animation
         bind_titles
