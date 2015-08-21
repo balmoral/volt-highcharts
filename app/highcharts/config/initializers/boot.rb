@@ -10,6 +10,5 @@
 # ^^ this include code required in the conditional.
 
 if RUBY_PLATFORM == 'opal'
-  require 'native'
-  require 'reactor'
+  # require 'native'
 end
