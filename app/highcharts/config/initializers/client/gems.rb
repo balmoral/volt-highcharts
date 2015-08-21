@@ -1,2 +1,3 @@
 require 'native'
-require 'reactor'
+require 'opal-highcharts'
+require 'volt-reactor'

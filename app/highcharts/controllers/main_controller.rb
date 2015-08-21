@@ -1,8 +1,9 @@
 if RUBY_PLATFORM == 'opal'
 
-require 'native'
-require 'opal-highcharts'
-require 'volt-reactor'
+# requires now in app/highcharts/initializers/client/gems.rb
+# require 'native'
+# require 'opal-highcharts'
+# require 'volt-reactor'
 
 module Highcharts
   class MainController < Volt::ModelController
