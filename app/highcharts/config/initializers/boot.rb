@@ -11,5 +11,5 @@
 
 if RUBY_PLATFORM == 'opal'
   require 'native'
-  require 'volt-reactor'
+  require 'reactor'
 end
