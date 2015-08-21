@@ -52,17 +52,16 @@ module Highcharts
     end
 
     def start_reactor
-      @in_start = false
       if reactive
+        @in_refresh_all = false
         bind_animation
         bind_titles
         bind_series
       end
-      @in_start = false
     end
 
     def bind_animation
-      bind(->{ _animate }, condition: ->{ !@in_start} ) do
+      bind(->{ _animate } ) do
         # debug __method__, __LINE__, "_animate=#{_animate} : refresh_all_series"
         refresh_all_series
       end
@@ -70,9 +69,9 @@ module Highcharts
 
     def bind_titles
       [->{ _title }, ->{ _subtitle }].each do |computation|
-        bind(computation, condition: ->{ !@in_start}, descend: true) do
+        bind(computation, descend: true) do
           # debug __method__, __LINE__, "_title #{_title} or _subtitle #{_subtitle} changed"
-          chart.set_title(_title.to_h, _subtitle.to_h, true)
+          chart.set_title(_title.to_h, _subtitle.to_h, true) unless @in_refresh_all
         end
       end
     end
@@ -86,33 +85,33 @@ module Highcharts
 
     def bind_series_other
       _series.each_with_index do |a_series, i|
-        bind(->{ a_series }, condition: ->{ !@in_start}, descend: true, tag: i, except: [:_data, :visible]) do |tag, val|
+        bind(->{ a_series }, descend: true, tag: i, except: [:_data, :visible]) do |tag, val|
           # debug __method__, __LINE__, "chart.series[#{tag}].update(#{val.to_h}, true)"
-          chart.series[tag].update(val.to_h, true)
+          chart.series[tag].update(val.to_h, true) unless @in_refresh_all
         end
       end
     end
 
     def bind_series_data
       _series.each_with_index do |a_series, i|
-        bind(->{ a_series._data }, condition: ->{ !@in_start}, tag: i) do |tag, val|
+        bind(->{ a_series._data }, tag: i) do |tag, val|
           # debug __method__, __LINE__, "chart.series[#{tag}].set_data(#{val.to_a}, true, #{_animate})"
-          chart.series[tag].set_data(val.to_a, true, _animate)
+          chart.series[tag].set_data(val.to_a, true, _animate) unless @in_refresh_all
         end
       end
     end
 
     def bind_series_visibility
       _series.each_with_index do |a_series, i|
-        bind(->{ a_series._visible }, condition: ->{ !@in_start}, tag: i) do |tag, val|
+        bind(->{ a_series._visible }, tag: i) do |tag, val|
           # debug __method__, __LINE__, "chart.series[#{tag}].set_visible(#{val}, true)"
-          chart.series[tag].set_data(val.to_a, true)
+          chart.series[tag].set_data(val.to_a, true) unless @in_refresh_all
         end
       end
     end
 
     def bind_series_size
-      bind_attributes("_series", _series, condition: ->{ !@in_start}, recurse: false) do |key, value|
+      bind_attributes("_series", _series, recurse: false) do |key, value|
         debug __method__, __LINE__, "_series.#{key} changed"
         refresh_all_series
       end
@@ -123,15 +122,17 @@ module Highcharts
     # 2. add all series in model to chart with no redraw
     # 3. redraw chart
     def refresh_all_series
-      # stop_reactor
-      until chart.series.empty? do
-        chart.series.last.remove(false)
+      unless @in_refresh_all
+        @in_refresh_all = true
+        until chart.series.empty? do
+          chart.series.last.remove(false)
+        end
+        _series.each do |a_series|
+          chart.add_series(a_series.to_h, false)
+        end
+        chart.redraw
+        @in_refresh_all = false
       end
-      _series.each do |a_series|
-        chart.add_series(a_series.to_h, false)
-      end
-      chart.redraw
-      # start_reactor
     end
 
     def stop_reactor
