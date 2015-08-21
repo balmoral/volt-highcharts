@@ -63,7 +63,7 @@ module Highcharts
     end
 
     def bind_animation
-      bind(->{ _animate }) do
+      bind(->{ _animate }, condition: ->{ !@in_start} ) do
         debug __method__, __LINE__, "_animate=#{_animate} : refresh_all_series"
         refresh_all_series
       end
@@ -135,6 +135,7 @@ module Highcharts
     end
 
     def stop_reactor
+      puts "stop_reactor"
       super
     end
 
