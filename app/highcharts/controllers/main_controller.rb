@@ -52,9 +52,8 @@ module Highcharts
     end
 
     def start_reactor
-      @in_start = true
+      @in_start = false
       if reactive
-        puts "starting reactor"
         bind_animation
         bind_titles
         bind_series
@@ -124,7 +123,7 @@ module Highcharts
     # 2. add all series in model to chart with no redraw
     # 3. redraw chart
     def refresh_all_series
-      stop_reactor
+      # stop_reactor
       until chart.series.empty? do
         chart.series.last.remove(false)
       end
@@ -132,11 +131,10 @@ module Highcharts
         chart.add_series(a_series.to_h, false)
       end
       chart.redraw
-      start_reactor
+      # start_reactor
     end
 
     def stop_reactor
-      puts "stop_reactor"
       super
     end
 
