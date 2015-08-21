@@ -2,9 +2,11 @@ if RUBY_PLATFORM == 'opal'
 
 require 'native'
 require 'opal-highcharts'
+require 'volt-reactor'
 
 module Highcharts
   class MainController < Volt::ModelController
+    include Reactor
 
     attr_reader :chart, :watches, :watch_counts, :reactive
 
@@ -159,19 +161,24 @@ module Highcharts
     end
 
     def watch(computation, descend: false, tag: nil, except: nil, &block)
-      @watches ||= []
-      @watches << -> do
-        val = compute(computation, descend, except)
-        unless @in_start
-          if block.arity == 0
-            block.call
-          elsif block.arity == 1
-            block.call(tag ? tag : val)
-          elsif block.arity == 2
-            block.call(tag, val)
+      use_reactor = true
+      if use_reactor
+        bind computation, condition: ->{ !@in_start}, descend: false, tag: nil, except: nil, &block
+      else
+        @watches ||= []
+        @watches << -> do
+          val = compute(computation, descend, except)
+          unless @in_start
+            if block.arity == 0
+              block.call
+            elsif block.arity == 1
+              block.call(tag ? tag : val)
+            elsif block.arity == 2
+              block.call(tag, val)
+            end
           end
-        end
-      end.watch!
+        end.watch!
+      end
     end
 
     def compute(computation, descend, except)
