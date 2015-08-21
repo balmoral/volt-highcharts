@@ -166,7 +166,7 @@ module Highcharts
         unless block
           raise ArgumentError, 'no block given for watch'
         end
-        bind(computation, condition: ->{ !@in_start}, descend: false, tag: nil, except: nil) { yield }
+        bind(computation, condition: ->{ !@in_start}, descend: false, tag: nil, except: nil, &block)
       else
         @watches ||= []
         @watches << -> do
