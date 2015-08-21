@@ -163,7 +163,10 @@ module Highcharts
     def watch(computation, descend: false, tag: nil, except: nil, &block)
       use_reactor = true
       if use_reactor
-        bind computation, condition: ->{ !@in_start}, descend: false, tag: nil, except: nil, &block
+        unless block
+          raise ArgumentError, 'no block given for watch'
+        end
+        bind(computation, condition: ->{ !@in_start}, descend: false, tag: nil, except: nil, &block)
       else
         @watches ||= []
         @watches << -> do
