@@ -75,9 +75,6 @@ module Highcharts
         bind(computation, condition: ->{ !@in_start}, descend: true) do
           chart.set_title(_title.to_h, _subtitle.to_h, true)
         end
-        # watch(computation, descend: true) do
-        #  chart.set_title(_title.to_h, _subtitle.to_h, true)
-        # end
       end
     end
 
@@ -90,7 +87,7 @@ module Highcharts
 
     def watch_series_other
       _series.each_with_index do |a_series, i|
-        watch ->{ a_series }, descend: true, tag: i, except: [:_data, :visible] do |tag, val|
+        bind(->{ a_series }, descend: true, tag: i, except: [:_data, :visible]) do |tag, val|
           # debug __method__, __LINE__, "chart.series[#{tag}].update(#{val.to_h}, true)"
           chart.series[tag].update(val.to_h, true)
         end
@@ -99,7 +96,7 @@ module Highcharts
 
     def watch_series_data
       _series.each_with_index do |a_series, i|
-        watch ->{ a_series._data }, tag: i do |tag, val|
+        bind(->{ a_series._data }, tag: i) do |tag, val|
           # debug __method__, __LINE__, "chart.series[#{tag}].set_data(#{val.to_a}, true, #{_animate})"
           chart.series[tag].set_data(val.to_a, true, _animate)
         end
@@ -108,7 +105,7 @@ module Highcharts
 
     def watch_series_visibility
       _series.each_with_index do |a_series, i|
-        watch ->{ a_series._visible }, tag: i do |tag, val|
+        bind(->{ a_series._visible }, tag: i) do |tag, val|
           # debug __method__, __LINE__, "chart.series[#{tag}].set_visible(#{val}, true)"
           chart.series[tag].set_data(val.to_a, true)
         end
