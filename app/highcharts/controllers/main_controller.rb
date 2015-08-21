@@ -124,7 +124,6 @@ module Highcharts
     def refresh_all_series
       unless @in_refresh_all
         @in_refresh_all = true
-        pause_reactor
         until chart.series.empty? do
           chart.series.last.remove(false)
         end
