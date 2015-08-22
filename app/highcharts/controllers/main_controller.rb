@@ -52,7 +52,6 @@ module Highcharts
 
     def start_reactor
       if reactive
-        @in_refresh_all = false
         bind_animation
         bind_titles
         bind_series
@@ -70,7 +69,7 @@ module Highcharts
       [->{ _title }, ->{ _subtitle }].each do |computation|
         bind(computation, inner: true) do
           # debug __method__, __LINE__, "_title #{_title} or _subtitle #{_subtitle} changed"
-          chart.set_title(_title.to_h, _subtitle.to_h, true) unless @in_refresh_all
+          chart.set_title(_title.to_h, _subtitle.to_h, true)
         end
       end
     end
@@ -86,7 +85,7 @@ module Highcharts
       _series.each_with_index do |a_series, i|
         bind(->{ a_series }, inner: true, skip: [:_data, :visible]) do |val|
           # debug __method__, __LINE__, "chart.series[#{i}].update(#{val.to_h}, true)"
-          chart.series[i].update(val.to_h, true) unless @in_refresh_all
+          chart.series[i].update(val.to_h, true)
         end
       end
     end
@@ -95,7 +94,7 @@ module Highcharts
       _series.each_with_index do |a_series, i|
         bind(->{ a_series._data }) do |val|
           # debug __method__, __LINE__, "chart.series[#{i}].set_data(#{val.to_a}, true, #{_animate})"
-          chart.series[i].set_data(val.to_a, true, _animate) unless @in_refresh_all
+          chart.series[i].set_data(val.to_a, true, _animate)
         end
       end
     end
@@ -104,7 +103,7 @@ module Highcharts
       _series.each_with_index do |a_series, i|
         bind(->{ a_series._visible }) do |val|
           # debug __method__, __LINE__, "chart.series[#{i}].set_visible(#{val}, true)"
-          chart.series[i].set_data(val.to_a, true) unless @in_refresh_all
+          chart.series[i].set_data(val.to_a, true)
         end
       end
     end
@@ -121,17 +120,13 @@ module Highcharts
     # 2. add all series in model to chart with no redraw
     # 3. redraw chart
     def refresh_all_series
-      unless @in_refresh_all
-        @in_refresh_all = true
-        until chart.series.empty? do
-          chart.series.last.remove(false)
-        end
-        _series.each do |a_series|
-          chart.add_series(a_series.to_h, false)
-        end
-        chart.redraw
-        @in_refresh_all = false
+      until chart.series.empty? do
+        chart.series.last.remove(false)
       end
+      _series.each do |a_series|
+        chart.add_series(a_series.to_h, false)
+      end
+      chart.redraw
     end
 
     def stop_reactor
