@@ -85,7 +85,7 @@ module Highcharts
       _series.each_with_index do |a_series, i|
         bind(->{ a_series }, inner: true, skip: [:_data, :visible]) do |val|
           # debug __method__, __LINE__, "chart.series[#{i}].update(#{val.to_h}, true)"
-          chart.series[i].update(val.to_h, true)
+          chart.series[i].update(val.to_h, true) if owner.nil?
         end
       end
     end
