@@ -92,9 +92,9 @@ module Highcharts
 
     def bind_series_data
       _series.each_with_index do |a_series, i|
-        bind(->{ a_series._data }) do |val|
+        bind(->{ a_series._data }) do |val, owner, key|
           # debug __method__, __LINE__, "chart.series[#{i}].set_data(#{val.to_a}, true, #{_animate})"
-          chart.series[i].set_data(val.to_a, true, _animate)
+          chart.series[i].set_data(val.to_a, true, _animate) if owner.id == chart.id && key == i
         end
       end
     end
