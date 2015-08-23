@@ -48,6 +48,7 @@ module Highcharts
       page._charts << {id: _id, chart: @chart}
       page._chart = @chart
       page._chart_id = _id
+      @chart.redraw
     end
 
     def start_reactor
