@@ -9,7 +9,3 @@
 # ^^ this will not send compile in code in the conditional to the client.
 # ^^ this include code required in the conditional.
 
-if RUBY_PLATFORM == 'opal'
-  require 'opal-highcharts'
-end
-
