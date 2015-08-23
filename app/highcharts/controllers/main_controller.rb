@@ -66,8 +66,8 @@ module Highcharts
     end
 
     def bind_titles
-      [->{ _title }, ->{ _subtitle }].each do |computation|
-        bind_atomic(computation) do
+      [->{ _title }, ->{ _subtitle }].each do |proc|
+        bind_atomic(proc) do
           # debug __method__, __LINE__, "_title #{_title} or _subtitle #{_subtitle} changed"
           chart.set_title(_title.to_h, _subtitle.to_h, true)
         end
@@ -83,7 +83,7 @@ module Highcharts
 
     def bind_series_other
       _series.each_with_index do |a_series, i|
-        bind_atomic(->{ a_series }, ignore: [:_data, :visible])
+        bind_atomic(->{ a_series }, ignore: [:_data, :visible]) do
           # debug __method__, __LINE__, "chart.series[#{i}].update(#{val.to_h}, true)"
           chart.series[i].update(a_series.to_h, true)
         end
@@ -92,7 +92,7 @@ module Highcharts
 
     def bind_series_data
       _series.each_with_index do |a_series, i|
-        bind ->{ a_series._data } do
+        bind(->{ a_series._data }) do
           # debug __method__, __LINE__, "chart.series[#{i}].set_data(#{val.to_a}, true, #{_animate})"
           chart.series[i].set_data(a_series._data.to_a, true, _animate)
         end
