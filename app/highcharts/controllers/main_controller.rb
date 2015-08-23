@@ -60,7 +60,7 @@ module Highcharts
 
     def bind_animation
       bind(->{ _animate }) do
-        debug __method__, __LINE__, "_animate=#{_animate} : refresh_all_series"
+        # debug __method__, __LINE__, "_animate=#{_animate} : refresh_all_series"
         refresh_all_series
       end
     end
@@ -101,9 +101,10 @@ module Highcharts
 
     def bind_series_visibility
       _series.each_with_index do |a_series, i|
-        bind ->{ a_series._visible } do
-          debug __method__, __LINE__, "chart.series[#{i}].set_visible(#{a_series._visible}, true)"
-          chart.series[i].set_visible(a_series._visible, true)
+        bind ->{ a_series._visible } do |_visible|
+          visible = _visible.nil? : true : _visible # in case not defined
+          # debug __method__, __LINE__, "chart.series[#{i}].set_visible(#{visible}, true)"
+          chart.series[i].set_visible(visible, true)
         end
       end
     end
