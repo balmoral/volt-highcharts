@@ -1,22 +1,22 @@
 if RUBY_PLATFORM == 'opal'
 
 require 'opal-highcharts'
-require 'volt-reactor'
+require 'volt-watch'
 
 module Highcharts
   class MainController < Volt::ModelController
-    include Volt::Reactor
+    include Volt::Watch
 
-    attr_reader :chart, :bind_counts, :reactive
+    attr_reader :chart, :watch_counts, :reactive
 
     def index_ready
       set_model
       create_chart
-      start_reactor
+      start_watches
     end
 
     def before_index_remove
-      stop_reactor
+      stop_watches
       destroy_chart
       @chart = nil
     end
@@ -50,58 +50,58 @@ module Highcharts
       page._chart_id = _id
     end
 
-    def start_reactor
+    def start_watches
       if reactive
-        bind_animation
-        bind_titles
-        bind_series
+        watch_animation
+        watch_titles
+        watch_series
       end
     end
 
-    def bind_animation
-      bind(->{ _animate }) do
+    def watch_animation
+      watch(->{ _animate }) do
         # debug __method__, __LINE__, "_animate=#{_animate} : refresh_all_series"
         refresh_all_series
       end
     end
 
-    def bind_titles
+    def watch_titles
       [->{ _title }, ->{ _subtitle }].each do |proc|
-        bind_atomic(proc) do
+        watch_general(proc) do
           # debug __method__, __LINE__, "_title #{_title} or _subtitle #{_subtitle} changed"
           chart.set_title(_title.to_h, _subtitle.to_h, true)
         end
       end
     end
 
-    def bind_series
-      # bind_series_size
-      bind_series_data
-      bind_series_visibility
-      bind_series_other
+    def watch_series
+      # watch_series_size
+      watch_series_data
+      watch_series_visibility
+      watch_series_other
     end
 
-    def bind_series_other
+    def watch_series_other
       _series.each_with_index do |a_series, i|
-        bind_atomic(->{ a_series }, ignore: [:_data, :visible]) do
+        watch_general(->{ a_series }, ignore: [:_data, :visible]) do
           # debug __method__, __LINE__, "chart.series[#{i}].update(#{a_series.to_h}, true)"
           chart.series[i].update(a_series.to_h, true)
         end
       end
     end
 
-    def bind_series_data
+    def watch_series_data
       _series.each_with_index do |a_series, i|
-        bind_atomic(->{ a_series._data }) do
+        watch_general(->{ a_series._data }) do
           # debug __method__, __LINE__, "chart.series[#{i}].set_data(#{a_series._data.to_a}, true, #{_animate})"
           chart.series[i].set_data(a_series._data.to_a, true, _animate)
         end
       end
     end
 
-    def bind_series_visibility
+    def watch_series_visibility
       _series.each_with_index do |a_series, i|
-        bind ->{ a_series._visible } do |_visible|
+        watch ->{ a_series._visible } do |_visible|
           visible = _visible.nil? ? true : _visible # in case not defined
           # debug __method__, __LINE__, "chart.series[#{i}].set_visible(#{visible}, true)"
           chart.series[i].set_visible(visible, true)
@@ -109,9 +109,9 @@ module Highcharts
       end
     end
 
-    def bind_series_size
+    def watch_series_size
       # to do collection sizes
-      # bind_attributes("_series", _series, recurse: false) do |key, value|
+      # watch_attributes("_series", _series, recurse: false) do |key, value|
       #  debug __method__, __LINE__, "_series.#{key} changed"
       #  refresh_all_series
       # end
@@ -129,10 +129,6 @@ module Highcharts
         chart.add_series(a_series.to_h, false)
       end
       chart.redraw
-    end
-
-    def stop_reactor
-      stop_bindings
     end
 
     def destroy_chart
