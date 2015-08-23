@@ -110,11 +110,12 @@ module Highcharts
     end
 
     def watch_series_size
-      # to do collection sizes
-      # watch_attributes("_series", _series, recurse: false) do |key, value|
-      #  debug __method__, __LINE__, "_series.#{key} changed"
-      #  refresh_all_series
-      # end
+      _series.each_with_index do |a_series, i|
+        watch ->{ a_series.size } do |size|
+          debug __method__, __LINE__, "chart.series[#{i}].set_data(#{a_series._data.to_a}, true, #{_animate})"
+          # chart.series[i].set_data(a_series._data.to_a, true, _animate)
+        end
+      end
     end
 
     # Do complete refresh of all series:
