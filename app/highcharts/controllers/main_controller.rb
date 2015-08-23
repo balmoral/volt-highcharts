@@ -67,7 +67,7 @@ module Highcharts
 
     def bind_titles
       [->{ _title }, ->{ _subtitle }].each do |computation|
-        bind(computation, inner: true) do
+        bind_atomic(computation) do
           # debug __method__, __LINE__, "_title #{_title} or _subtitle #{_subtitle} changed"
           chart.set_title(_title.to_h, _subtitle.to_h, true)
         end
@@ -83,36 +83,37 @@ module Highcharts
 
     def bind_series_other
       _series.each_with_index do |a_series, i|
-        bind(->{ a_series }, inner: true, skip: [:_data, :visible]) do |val, owner, key|
+        bind_atomic(->{ a_series }, ignore: [:_data, :visible]) do |val|
           # debug __method__, __LINE__, "chart.series[#{i}].update(#{val.to_h}, true)"
-          chart.series[i].update(val.to_h, true) if owner.nil?
+          chart.series[i].update(val.to_h, true)
         end
       end
     end
 
     def bind_series_data
       _series.each_with_index do |a_series, i|
-        bind(->{ a_series._data }) do |val, owner, key|
+        bind(->{ a_series._data }) do
           # debug __method__, __LINE__, "chart.series[#{i}].set_data(#{val.to_a}, true, #{_animate})"
-          chart.series[i].set_data(val.to_a, true, _animate) if owner.nil?
+          chart.series[i].set_data(a_series._data.to_a, true, _animate)
         end
       end
     end
 
     def bind_series_visibility
       _series.each_with_index do |a_series, i|
-        bind(->{ a_series._visible }) do |val|
+        bind(->{ a_series._visible })
           # debug __method__, __LINE__, "chart.series[#{i}].set_visible(#{val}, true)"
-          chart.series[i].set_data(val.to_a, true)
+          chart.series[i].set_visible(a_series._visible, true)
         end
       end
     end
 
     def bind_series_size
-      bind_attributes("_series", _series, recurse: false) do |key, value|
-        debug __method__, __LINE__, "_series.#{key} changed"
-        refresh_all_series
-      end
+      # to do collection sizes
+      # bind_attributes("_series", _series, recurse: false) do |key, value|
+      #  debug __method__, __LINE__, "_series.#{key} changed"
+      #  refresh_all_series
+      # end
     end
 
     # Do complete refresh of all series:
