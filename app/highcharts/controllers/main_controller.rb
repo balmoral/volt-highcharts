@@ -83,16 +83,16 @@ module Highcharts
 
     def bind_series_other
       _series.each_with_index do |a_series, i|
-        bind_atomic(->{ a_series }, ignore: [:_data, :visible]) do |val|
+        bind_atomic(->{ a_series }, ignore: [:_data, :visible])
           # debug __method__, __LINE__, "chart.series[#{i}].update(#{val.to_h}, true)"
-          chart.series[i].update(val.to_h, true)
+          chart.series[i].update(a_series.to_h, true)
         end
       end
     end
 
     def bind_series_data
       _series.each_with_index do |a_series, i|
-        bind(->{ a_series._data }) do
+        bind ->{ a_series._data } do
           # debug __method__, __LINE__, "chart.series[#{i}].set_data(#{val.to_a}, true, #{_animate})"
           chart.series[i].set_data(a_series._data.to_a, true, _animate)
         end
@@ -101,7 +101,7 @@ module Highcharts
 
     def bind_series_visibility
       _series.each_with_index do |a_series, i|
-        bind(->{ a_series._visible })
+        bind ->{ a_series._visible } do
           # debug __method__, __LINE__, "chart.series[#{i}].set_visible(#{val}, true)"
           chart.series[i].set_visible(a_series._visible, true)
         end
