@@ -102,7 +102,7 @@ module Highcharts
     def bind_series_visibility
       _series.each_with_index do |a_series, i|
         bind ->{ a_series._visible } do |_visible|
-          visible = _visible.nil? : true : _visible # in case not defined
+          visible = _visible.nil? ? true : _visible # in case not defined
           # debug __method__, __LINE__, "chart.series[#{i}].set_visible(#{visible}, true)"
           chart.series[i].set_visible(visible, true)
         end
