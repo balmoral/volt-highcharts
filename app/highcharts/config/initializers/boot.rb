@@ -10,5 +10,6 @@
 # ^^ this include code required in the conditional.
 
 if RUBY_PLATFORM == 'opal'
-  Opal.use_gem('opal-highcharts')
+  require 'opal-highcharts'
 end
+
