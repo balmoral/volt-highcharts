@@ -85,7 +85,7 @@ module Highcharts
       _series.each_with_index do |a_series, i|
         watch_any(->{ a_series }, ignore: [:_data, :visible]) do
           # debug __method__, __LINE__, "chart.series[#{i}].update(#{a_series.to_h}, true)"
-          chart.series[i].update(a_series.to_h, true)
+          chart.series[i].update(a_series.to_h.dup, true)
         end
       end
     end
