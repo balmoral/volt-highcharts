@@ -59,33 +59,35 @@ module Highcharts
     end
 
     def watch_animation
-      activate ->{
+      activate -> do
         _animate
         debug __method__, __LINE__, "__animate changed to #{_animate}"
         refresh_all_series
-      }
+      end
     end
 
     def watch_titles
-      activate ->{
+      activate -> do
         debug __method__, __LINE__, "_title #{_title} or _subtitle #{_subtitle} changed"
         chart.set_title(_title.to_h, _subtitle.to_h, true)
-      }
+      end
     end
 
     def watch_series
       _series.each_with_index do |a_series, i|
         on_change_in(a_series) do |parent, attr, value|
           debug __method__, __LINE__, "#{parent}.#{attr} => #{value}"
-          if attr == :data
-            chart.series[i].set_data(value.to_a, true, value)
-          elsif attr == :visible
-            visible = value.nil? ? true : value # in case not defined
-            chart.series[i].set_visible(visible, true)
-          elsif attr == :size
-            chart.series[i].update(a_series.to_h.dup, true)
-          else # something we can't set specifically changed
-            chart.series[i].update(a_series.to_h.dup, true)
+          case attr
+            when :data
+              chart.series[i].set_data(value.to_a, true, value)
+            when :visible
+              visible = value.nil? ? true : value # in case not defined
+              chart.series[i].set_visible(visible, true)
+            when :size
+              chart.series[i].update(a_series.to_h.dup, true)
+            else
+              # something we can't set specifically changed
+              chart.series[i].update(a_series.to_h.dup, true)
           end
         end
       end
