@@ -77,7 +77,7 @@ module Highcharts
       # TODO: handle change in _series_size
       _series.size.times do |i|
         on_change_in(_series[i]) do |a_series, attr, value|
-          debug __method__, __LINE__, "_series[#{i}]: #{a_series}.#{attr} changed to #{value}"
+          # debug __method__, __LINE__, "_series[#{i}]: #{a_series}.#{attr} changed to #{value}"
           case attr
             when :data
               chart.series[i].set_data(value.to_a, true, value)
