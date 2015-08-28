@@ -62,7 +62,7 @@ module Highcharts
       activate {
         _animate
         debug __method__, __LINE__, "__animate changed to #{_animate}"
-        refresh_all_series
+        # refresh_all_series
       }
     end
 
