@@ -70,11 +70,16 @@ module Highcharts
       on_change_in(_title, _subtitle) -> do
         debug __method__, __LINE__, "_title #{_title} changed"
         chart.set_title(_title.to_h, _subtitle.to_h, true)
+        set_chart_titles
       end
       on_change_in(_subtitle) -> do
         debug __method__, __LINE__, "_subtitle #{_title} changed"
-        chart.set_title(_title.to_h, _subtitle.to_h, true)
+        set_chart_titles
       end
+    end
+
+    def set_chart_titles
+      chart.set_title(_title.to_h, _subtitle.to_h, true)
     end
 
     def watch_series
