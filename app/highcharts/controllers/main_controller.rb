@@ -77,15 +77,12 @@ module Highcharts
       _series.each_with_index do |a_series, i|
         on_change_in(a_series) do |parent, attr, value|
           debug __method__, __LINE__, "#{parent}.#{attr} => #{value}"
-          if attr == :_data
-            debug __method__, __LINE__, "chart.series[#{i}].set_data(#{a_series._data.to_a}, true, #{value})"
+          if attr == :data
             chart.series[i].set_data(value.to_a, true, value)
-          elsif attr == :_visible
+          elsif attr == :visible
             visible = value.nil? ? true : value # in case not defined
-            debug __method__, __LINE__, "chart.series[#{i}].set_visible(#{visible}, true)"
             chart.series[i].set_visible(visible, true)
-          elsif attr == :_size
-            debug __method__, __LINE__, "series size changed to #{value}"
+          elsif attr == :size
             chart.series[i].update(a_series.to_h.dup, true)
           else # something we can't set specifically changed
             chart.series[i].update(a_series.to_h.dup, true)
