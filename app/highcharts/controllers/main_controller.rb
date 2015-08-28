@@ -68,15 +68,15 @@ module Highcharts
 
     def watch_titles
       on_change_in(_title, _subtitle) do
-        debug __method__, __LINE__, "_title #{_title} or _subtitle #{_subtitle} changed"
+        # debug __method__, __LINE__, "_title #{_title} or _subtitle #{_subtitle} changed"
         chart.set_title(_title.to_h, _subtitle.to_h, true)
       end
     end
 
     def watch_series
       _series.each_with_index do |a_series, i|
-        on_change_in(a_series) do |parent, attr, value|
-          # debug __method__, __LINE__, "#{parent}.#{attr} => #{value}"
+        on_change_in(a_series) do |_ignore, attr, value|
+          debug __method__, __LINE__, "#{parent}.#{attr} => #{value}"
           case attr
             when :data
               chart.series[i].set_data(value.to_a, true, value)
