@@ -80,7 +80,7 @@ module Highcharts
           # debug __method__, __LINE__, "_series[#{i}]: #{a_series}.#{attr} changed to #{value}"
           case attr
             when :data
-              chart.series[i].set_data(value.to_a, true, value)
+              chart.series[i].set_data(value.to_a, true, _animate)
             when :visible
               visible = value.nil? ? true : value # in case not defined
               chart.series[i].set_visible(visible, true)
@@ -101,7 +101,7 @@ module Highcharts
         chart.series.last.remove(false)
       end
       _series.each do |a_series|
-        chart.add_series(a_series.to_h, false)
+        chart.add_series(a_series.to_h, false, _animate)
       end
       chart.redraw
     end
