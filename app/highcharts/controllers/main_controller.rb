@@ -59,19 +59,18 @@ module Highcharts
     end
 
     def watch_animation
-      watch(->{ _animate }) do
+      activate {
+        _animate
         # debug __method__, __LINE__, "_animate=#{_animate} : refresh_all_series"
         refresh_all_series
-      end
+      }
     end
 
     def watch_titles
-      [->{ _title }, ->{ _subtitle }].each do |proc|
-        watch_any(proc) do
-          # debug __method__, __LINE__, "_title #{_title} or _subtitle #{_subtitle} changed"
-          chart.set_title(_title.to_h, _subtitle.to_h, true)
-        end
-      end
+      activate -> {
+        # debug __method__, __LINE__, "_title #{_title} or _subtitle #{_subtitle} changed"
+        chart.set_title(_title.to_h, _subtitle.to_h, true)
+      }
     end
 
     def watch_series
