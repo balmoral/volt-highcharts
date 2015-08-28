@@ -59,7 +59,7 @@ module Highcharts
     end
 
     def watch_animation
-      activate {
+      activate ->{
         _animate
         # debug __method__, __LINE__, "_animate=#{_animate} : refresh_all_series"
         refresh_all_series
@@ -67,7 +67,7 @@ module Highcharts
     end
 
     def watch_titles
-      activate -> {
+      activate ->{
         # debug __method__, __LINE__, "_title #{_title} or _subtitle #{_subtitle} changed"
         chart.set_title(_title.to_h, _subtitle.to_h, true)
       }
