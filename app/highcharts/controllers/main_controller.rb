@@ -75,45 +75,21 @@ module Highcharts
     end
 
     def watch_series
-      # watch_series_size
-      watch_series_data
-      watch_series_visibility
-      watch_series_other
-    end
-
-    def watch_series_other
       _series.each_with_index do |a_series, i|
-        watch_any(->{ a_series }, ignore: [:_data, :visible]) do
-          # debug __method__, __LINE__, "chart.series[#{i}].update(#{a_series.to_h}, true)"
-          chart.series[i].update(a_series.to_h.dup, true)
-        end
-      end
-    end
-
-    def watch_series_data
-      _series.each_with_index do |a_series, i|
-        watch_any(->{ a_series._data }) do
-          # debug __method__, __LINE__, "chart.series[#{i}].set_data(#{a_series._data.to_a}, true, #{_animate})"
-          chart.series[i].set_data(a_series._data.to_a, true, _animate)
-        end
-      end
-    end
-
-    def watch_series_visibility
-      _series.each_with_index do |a_series, i|
-        watch ->{ a_series._visible } do |_visible|
-          visible = _visible.nil? ? true : _visible # in case not defined
-          # debug __method__, __LINE__, "chart.series[#{i}].set_visible(#{visible}, true)"
-          chart.series[i].set_visible(visible, true)
-        end
-      end
-    end
-
-    def watch_series_size
-      _series.each_with_index do |a_series, i|
-        watch ->{ a_series.size } do |size|
-          debug __method__, __LINE__, "chart.series[#{i}].set_data(#{a_series._data.to_a}, true, #{_animate})"
-          # chart.series[i].set_data(a_series._data.to_a, true, _animate)
+        on_change_in(a_series) do |parent, attr, value|
+          if attr == :_data
+            debug __method__, __LINE__, "chart.series[#{i}].set_data(#{a_series._data.to_a}, true, #{value})"
+            chart.series[i].set_data(value.to_a, true, value)
+          elsif attr == :_visible
+            visible = value.nil? ? true : value # in case not defined
+            debug __method__, __LINE__, "chart.series[#{i}].set_visible(#{visible}, true)"
+            chart.series[i].set_visible(visible, true)
+          elsif attr == :_size
+            debug __method__, __LINE__, "series size changed to #{value}"
+            chart.series[i].update(a_series.to_h.dup, true)
+          else # something we can't set specifically changed
+            chart.series[i].update(a_series.to_h.dup, true)
+          end
         end
       end
     end
