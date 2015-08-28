@@ -59,11 +59,11 @@ module Highcharts
     end
 
     def watch_animation
-      activate -> do
+      activate {
         _animate
         debug __method__, __LINE__, "__animate changed to #{_animate}"
         refresh_all_series
-      end
+      }
     end
 
     def watch_titles
@@ -74,7 +74,10 @@ module Highcharts
     end
 
     def watch_series
-      # TODO: handle change in _series_size
+      activate {
+        _series.size
+        refresh_all_series
+      }
       _series.size.times do |i|
         on_change_in(_series[i]) do |a_series, attr, value|
           # debug __method__, __LINE__, "_series[#{i}]: #{a_series}.#{attr} changed to #{value}"
