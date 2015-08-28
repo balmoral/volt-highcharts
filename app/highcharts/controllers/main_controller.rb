@@ -76,6 +76,7 @@ module Highcharts
     def watch_series
       _series.each_with_index do |a_series, i|
         on_change_in(a_series) do |parent, attr, value|
+          debug __method__, __LINE__, "#{parent}.#{attr} => #{value}"
           if attr == :_data
             debug __method__, __LINE__, "chart.series[#{i}].set_data(#{a_series._data.to_a}, true, #{value})"
             chart.series[i].set_data(value.to_a, true, value)
