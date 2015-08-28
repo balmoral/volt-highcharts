@@ -74,17 +74,16 @@ module Highcharts
     end
 
     def watch_series
-      _series.each_with_index do |a_series, i|
-        on_change_in(a_series) do |_ignore, attr, value|
-          debug __method__, __LINE__, "#{parent}.#{attr} => #{value}"
+      # TODO: handle change in _series_size
+      _series.size.times do |i|
+        on_change_in(_series[i]) do |a_series, attr, value|
+          debug __method__, __LINE__, "_series[#{i}]: #{a_series}.#{attr} changed to #{value}"
           case attr
             when :data
               chart.series[i].set_data(value.to_a, true, value)
             when :visible
               visible = value.nil? ? true : value # in case not defined
               chart.series[i].set_visible(visible, true)
-            when :size
-              chart.series[i].update(a_series.to_h.dup, true)
             else
               # something we can't set specifically changed
               chart.series[i].update(a_series.to_h.dup, true)
