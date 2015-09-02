@@ -1,5 +1,5 @@
 sh tasks/build
-# git remote add origin https://github.com/balmoral/volt-highcharts.git
-# git push -u origin master
+git remote add origin https://github.com/balmoral/volt-highcharts.git
+git push -u origin master
 git push
 #gem push volt-highcharts-0.1.5.gem
